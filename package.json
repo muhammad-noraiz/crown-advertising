@@ -6,9 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:seed": "npx tsx scripts/seed.ts",
+    "db:setup": "supabase start && supabase db reset && npx tsx scripts/seed.ts",
+    "env:local": "cp .env.development .env.local && echo '✅ Switched to LOCAL Supabase'",
+    "env:remote": "cp .env.remote .env.local && echo '✅ Switched to REMOTE Supabase (jiqkfkmjiquyelrnfsni)'"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.104.1",
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -18,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",

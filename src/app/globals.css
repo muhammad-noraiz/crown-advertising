@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ── Dark mode (class-based via JS toggle) ───────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f7f4ec;
   --foreground: #0d100b;
@@ -129,3 +132,191 @@ html {
     transition: none;
   }
 }
+
+/* ── Dashboard dark mode overrides ──────────────────────────────── */
+
+html.dark .dashboard-main {
+  background-color: rgb(2 6 23);
+}
+
+/* ── Backgrounds ─────────────────────────────────────────────────── */
+
+html.dark .dashboard-main .bg-white {
+  background-color: rgb(15 23 42) !important;
+}
+
+/* Table/card header & tfoot tinted rows */
+html.dark .dashboard-main .bg-slate-50 {
+  background-color: rgb(22 31 55) !important;
+}
+
+/* Chip/badge base for neutral badges */
+html.dark .dashboard-main .bg-slate-100 {
+  background-color: rgb(30 41 59) !important;
+}
+
+/* Amber highlight banners */
+html.dark .dashboard-main .bg-amber-50 {
+  background-color: rgb(120 53 15 / 0.2) !important;
+}
+
+/* Coloured status badge backgrounds */
+html.dark .dashboard-main .bg-blue-50,
+html.dark .fixed .bg-blue-50 { background-color: rgb(37 99 235 / 0.15) !important; }
+
+html.dark .dashboard-main .bg-blue-100,
+html.dark .fixed .bg-blue-100 { background-color: rgb(37 99 235 / 0.18) !important; }
+
+html.dark .dashboard-main .bg-purple-100,
+html.dark .fixed .bg-purple-100 { background-color: rgb(147 51 234 / 0.18) !important; }
+
+html.dark .dashboard-main .bg-green-100,
+html.dark .fixed .bg-green-100 { background-color: rgb(22 163 74 / 0.18) !important; }
+
+html.dark .dashboard-main .bg-yellow-100,
+html.dark .fixed .bg-yellow-100 { background-color: rgb(202 138 4 / 0.18) !important; }
+
+html.dark .dashboard-main .bg-red-50,
+html.dark .fixed .bg-red-50 { background-color: rgb(220 38 38 / 0.12) !important; }
+
+html.dark .dashboard-main .bg-red-100,
+html.dark .fixed .bg-red-100 { background-color: rgb(220 38 38 / 0.18) !important; }
+
+html.dark .dashboard-main .bg-amber-100,
+html.dark .fixed .bg-amber-100 { background-color: rgb(217 119 6 / 0.18) !important; }
+
+html.dark .dashboard-main .bg-emerald-50,
+html.dark .fixed .bg-emerald-50 { background-color: rgb(16 185 129 / 0.12) !important; }
+
+/* ── Borders ─────────────────────────────────────────────────────── */
+
+html.dark .dashboard-main .border-slate-100 { border-color: rgb(30 41 59) !important; }
+html.dark .dashboard-main .border-slate-200 { border-color: rgb(30 41 59) !important; }
+html.dark .dashboard-main .border-slate-300 { border-color: rgb(51 65 85) !important; }
+html.dark .dashboard-main .border-amber-200 { border-color: rgb(120 53 15 / 0.4) !important; }
+html.dark .dashboard-main .border-t-2       { border-color: rgb(30 41 59) !important; }
+
+/* Table row dividers */
+html.dark .dashboard-main table tbody tr,
+html.dark .dashboard-main table tfoot tr {
+  border-color: rgb(22 31 55) !important;
+}
+
+/* ── Text ─────────────────────────────────────────────────────────── */
+
+html.dark .dashboard-main .text-slate-900 { color: rgb(248 250 252) !important; }
+html.dark .dashboard-main .text-slate-800 { color: rgb(226 232 240) !important; }
+html.dark .dashboard-main .text-slate-700 { color: rgb(203 213 225) !important; }
+html.dark .dashboard-main .text-slate-600 { color: rgb(148 163 184) !important; }
+html.dark .dashboard-main .text-slate-500 { color: rgb(100 116 139) !important; }
+html.dark .dashboard-main .text-slate-400 { color: rgb(71 85 105) !important; }
+
+/* Coloured badge text → lighter pastel variants */
+html.dark .dashboard-main .text-blue-700,
+html.dark .fixed .text-blue-700  { color: rgb(147 197 253) !important; }
+
+html.dark .dashboard-main .text-purple-700,
+html.dark .fixed .text-purple-700 { color: rgb(196 181 253) !important; }
+
+html.dark .dashboard-main .text-green-700,
+html.dark .fixed .text-green-700  { color: rgb(134 239 172) !important; }
+
+html.dark .dashboard-main .text-yellow-700,
+html.dark .fixed .text-yellow-700 { color: rgb(253 224 71) !important; }
+
+html.dark .dashboard-main .text-red-700,
+html.dark .fixed .text-red-700    { color: rgb(252 165 165) !important; }
+
+/* Keep red-600 readable (expenses/delete) */
+html.dark .dashboard-main .text-red-600,
+html.dark .fixed .text-red-600    { color: rgb(248 113 113) !important; }
+
+html.dark .dashboard-main .text-amber-700,
+html.dark .fixed .text-amber-700  { color: rgb(252 191 73) !important; }
+
+/* Neutral badge text */
+html.dark .dashboard-main .text-slate-600 { color: rgb(148 163 184) !important; }
+
+/* ── Table interactions ───────────────────────────────────────────── */
+
+/* Hover highlight on table rows */
+html.dark .dashboard-main table tr:hover td {
+  background-color: rgb(30 41 59) !important;
+}
+
+/* thead th background (bg-slate-50 already covered) */
+html.dark .dashboard-main thead tr {
+  background-color: rgb(22 31 55) !important;
+}
+
+/* tfoot row */
+html.dark .dashboard-main tfoot tr {
+  background-color: rgb(22 31 55) !important;
+}
+
+/* ── Form controls ───────────────────────────────────────────────── */
+
+html.dark .dashboard-main input:not([type="date"]),
+html.dark .dashboard-main select,
+html.dark .dashboard-main textarea {
+  background-color: rgb(22 31 55) !important;
+  border-color: rgb(51 65 85) !important;
+  color: rgb(226 232 240) !important;
+}
+
+html.dark .dashboard-main input[type="date"] {
+  background-color: rgb(22 31 55) !important;
+  border-color: rgb(51 65 85) !important;
+  color: rgb(226 232 240) !important;
+  color-scheme: dark;
+}
+
+html.dark .dashboard-main input::placeholder,
+html.dark .dashboard-main textarea::placeholder {
+  color: rgb(71 85 105) !important;
+}
+
+/* ── Modals (fixed overlay) ──────────────────────────────────────── */
+
+html.dark .fixed .bg-white  { background-color: rgb(15 23 42) !important; }
+html.dark .fixed .bg-slate-50 { background-color: rgb(22 31 55) !important; }
+html.dark .fixed .bg-slate-100 { background-color: rgb(30 41 59) !important; }
+
+html.dark .fixed .border-slate-100,
+html.dark .fixed .border-slate-200 { border-color: rgb(30 41 59) !important; }
+html.dark .fixed .border-slate-300 { border-color: rgb(51 65 85) !important; }
+
+html.dark .fixed .text-slate-900 { color: rgb(248 250 252) !important; }
+html.dark .fixed .text-slate-800 { color: rgb(226 232 240) !important; }
+html.dark .fixed .text-slate-700 { color: rgb(203 213 225) !important; }
+html.dark .fixed .text-slate-600 { color: rgb(148 163 184) !important; }
+html.dark .fixed .text-slate-500 { color: rgb(100 116 139) !important; }
+html.dark .fixed .text-slate-400 { color: rgb(71 85 105) !important; }
+
+html.dark .fixed input:not([type="date"]),
+html.dark .fixed select,
+html.dark .fixed textarea {
+  background-color: rgb(22 31 55) !important;
+  border-color: rgb(51 65 85) !important;
+  color: rgb(226 232 240) !important;
+}
+
+html.dark .fixed input[type="date"] {
+  background-color: rgb(22 31 55) !important;
+  border-color: rgb(51 65 85) !important;
+  color: rgb(226 232 240) !important;
+  color-scheme: dark;
+}
+
+html.dark .fixed input::placeholder,
+html.dark .fixed textarea::placeholder {
+  color: rgb(71 85 105) !important;
+}
+
+html.dark .fixed label.block,
+html.dark .fixed label { color: rgb(203 213 225) !important; }
+
+/* Toggle label text inside modals */
+html.dark .fixed span.text-sm { color: rgb(203 213 225) !important; }
+
+
