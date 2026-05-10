@@ -30,11 +30,14 @@ const bookingStatusLabel: Record<string, { label: string; cls: string }> = {
 };
 
 const expenseTypeLabel: Record<string, string> = {
-  installation: "Installation / Labour",
-  land_rent: "Land Rent",
-  tax: "Gov. Tax",
-  maintenance: "Maintenance",
-  other: "Other",
+  rent: "RENT",
+  tax: "TAX",
+  electricity_bills_lights_charges: "Electricity Bills / Lights Charges",
+  pr_commission: "PR Commission",
+  noc_fees: "NOC Fees",
+  labour_installation_cost: "Labour / Installation Cost",
+  installation: "Labour / Installation Cost",
+  land_rent: "RENT",
 };
 
 const landTypeLabel: Record<string, { label: string; cls: string }> = {

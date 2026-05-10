@@ -6,11 +6,12 @@ import { updateExpense } from "@/actions/expenses";
 import type { LocationExpense } from "@/lib/supabase/types";
 
 const EXPENSE_TYPES = [
-  { value: "installation", label: "Installation / Labour" },
-  { value: "land_rent", label: "Land Rent (Private)" },
-  { value: "tax", label: "Government Tax" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "other", label: "Other" },
+  { value: "rent", label: "RENT" },
+  { value: "tax", label: "TAX" },
+  { value: "electricity_bills_lights_charges", label: "Electricity Bills / Lights Charges" },
+  { value: "pr_commission", label: "PR Commission" },
+  { value: "noc_fees", label: "NOC Fees" },
+  { value: "labour_installation_cost", label: "Labour / Installation Cost" },
 ];
 
 function EditExpenseContent({

@@ -39,7 +39,14 @@ FROM   clients c
 WHERE  LOWER(TRIM(c.name)) = LOWER(TRIM(b.client_name));
 
 -- ── Expenses ─────────────────────────────────────────────────
-CREATE TYPE expense_type AS ENUM ('installation', 'land_rent', 'tax', 'maintenance', 'other');
+CREATE TYPE expense_type AS ENUM (
+  'rent',
+  'tax',
+  'electricity_bills_lights_charges',
+  'pr_commission',
+  'noc_fees',
+  'labour_installation_cost'
+);
 
 CREATE TABLE IF NOT EXISTS location_expenses (
   id           BIGSERIAL PRIMARY KEY,

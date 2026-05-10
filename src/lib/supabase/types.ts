@@ -1,6 +1,12 @@
 export type InvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 export type LandType = 'private' | 'government' | 'crown';
-export type ExpenseType = 'installation' | 'land_rent' | 'tax' | 'maintenance' | 'other';
+export type ExpenseType =
+  | 'rent'
+  | 'tax'
+  | 'electricity_bills_lights_charges'
+  | 'pr_commission'
+  | 'noc_fees'
+  | 'labour_installation_cost';
 
 export interface Location {
   id: number;
