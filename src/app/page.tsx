@@ -231,6 +231,7 @@ export default function Home() {
               ["About", "#about"],
               ["Services", "#services"],
               ["Work", "#work"],
+              ["Locations", "/locations-showcase"],
               ["Contact", "#contact"],
             ].map(([label, href]) => (
               <a
@@ -290,8 +291,8 @@ export default function Home() {
               <a href="#work" className="rounded-full bg-[#d4ea52] px-7 py-4 text-sm font-black uppercase tracking-[0.12em] text-[#0d100b] shadow-[0_12px_36px_rgba(212,234,82,0.28)] transition hover:-translate-y-0.5 hover:bg-white">
                 Explore Projects
               </a>
-              <a href="#services" className="rounded-full border border-white/20 px-7 py-4 text-sm font-black uppercase tracking-[0.12em] text-white transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/8">
-                View Services
+              <a href="/locations-showcase" className="rounded-full border border-white/20 px-7 py-4 text-sm font-black uppercase tracking-[0.12em] text-white transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/8">
+                View Locations
               </a>
             </div>
             <div className="mt-12 flex flex-wrap gap-8 border-t border-white/10 pt-8">

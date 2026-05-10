@@ -1,5 +1,7 @@
 export type InvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 export type LandType = 'private' | 'government' | 'crown';
+export type PricingBasis = 'monthly' | 'slot' | 'on_request';
+export type LocationMediaCategory = 'static' | 'motorway' | 'digital' | 'bridge-panel' | 'toll-plaza';
 export type ExpenseType =
   | 'rent'
   | 'tax'
@@ -15,10 +17,37 @@ export interface Location {
   city: string;
   address: string | null;
   land_type: LandType;
+  price_per_month: number | null;
+  price_label: string | null;
+  pricing_basis: PricingBasis;
+  facing_from: string | null;
+  facing_towards: string | null;
+  media_category: LocationMediaCategory;
+  source_slide: number | null;
+  public_image_path: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
 }
+
+export type LocationInsert = {
+  name: string;
+  size: string;
+  city: string;
+  address?: string | null;
+  land_type?: LandType;
+  price_per_month?: number | null;
+  price_label?: string | null;
+  pricing_basis?: PricingBasis;
+  facing_from?: string | null;
+  facing_towards?: string | null;
+  media_category?: LocationMediaCategory;
+  source_slide?: number | null;
+  public_image_path?: string | null;
+  is_active?: boolean;
+};
+
+export type LocationUpdate = Partial<Omit<Location, 'id' | 'created_at' | 'updated_at'>>;
 
 export interface Booking {
   id: number;
@@ -103,8 +132,8 @@ export interface Database {
     Tables: {
       locations: {
         Row: Location;
-        Insert: Omit<Location, 'id' | 'created_at' | 'updated_at'>;
-        Update: Partial<Omit<Location, 'id' | 'created_at' | 'updated_at'>>;
+        Insert: LocationInsert;
+        Update: LocationUpdate;
         Relationships: [];
       };
       bookings: {
@@ -131,6 +160,12 @@ export interface Database {
         Update: Partial<Omit<LocationPartner, 'id' | 'created_at' | 'updated_at'>>;
         Relationships: [];
       };
+      location_images: {
+        Row: LocationImage;
+        Insert: Omit<LocationImage, 'id' | 'created_at'>;
+        Update: Partial<Omit<LocationImage, 'id' | 'created_at'>>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Enums: {
@@ -139,5 +174,6 @@ export interface Database {
       expense_type: ExpenseType;
     };
     Functions: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }

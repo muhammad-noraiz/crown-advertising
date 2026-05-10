@@ -15,6 +15,7 @@ import { AddBookingModal } from "@/app/dashboard/bookings/AddBookingModal";
 import { EditLocationModal } from "@/app/dashboard/locations/EditLocationModal";
 import { EditBookingModal } from "@/app/dashboard/bookings/EditBookingModal";
 import { LocationImagesTab } from "./LocationImagesTab";
+import { locationCategoryLabels } from "@/lib/location-showcase-types";
 
 const invoiceStatusLabel: Record<string, { label: string; cls: string }> = {
   PENDING: { label: "Pending", cls: "bg-yellow-100 text-yellow-700" },
@@ -46,6 +47,16 @@ const landTypeLabel: Record<string, { label: string; cls: string }> = {
   government: { label: "Govt. Land", cls: "bg-purple-100 text-purple-700" },
 };
 
+function formatLocationPrice(location: LocationWithBookings) {
+  if (location.price_label) return location.price_label;
+  if (location.price_per_month === null) return "Price on request";
+
+  const amount = new Intl.NumberFormat("en-PK", { maximumFractionDigits: 0 }).format(location.price_per_month);
+  if (location.pricing_basis === "slot") return `PKR ${amount} / slot`;
+  if (location.pricing_basis === "on_request") return `PKR ${amount}`;
+  return `PKR ${amount} / month`;
+}
+
 export default async function LocationDetailPage({
   params,
   searchParams,
@@ -76,7 +87,7 @@ export default async function LocationDetailPage({
   const clients = (clientsData ?? []) as { id: number; name: string }[];
   const images = (imagesData ?? []) as LocationImage[];
   const now = new Date();
-  const activeBooking = loc.bookings.find((b) => new Date(b.end_date) >= now);
+  const activeBooking = loc.bookings.find((b) => new Date(b.start_date) <= now && new Date(b.end_date) >= now);
   const totalPartnersPercent = partners.reduce((s, p) => s + p.percentage, 0);
   const crownPercent = Math.max(0, 100 - totalPartnersPercent);
   const llt = landTypeLabel[loc.land_type ?? "crown"];
@@ -102,6 +113,12 @@ export default async function LocationDetailPage({
             {loc.size} · {loc.city}
             {loc.address && ` · ${loc.address}`}
           </p>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium">
+            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">{formatLocationPrice(loc)}</span>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">{locationCategoryLabels[loc.media_category]}</span>
+            {loc.facing_from && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">From: {loc.facing_from}</span>}
+            {loc.facing_towards && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">Towards: {loc.facing_towards}</span>}
+          </div>
         </div>
         <div className="flex gap-2">
           <AddBookingModal locations={locations} clients={clients} defaultLocationId={loc.id} />

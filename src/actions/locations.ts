@@ -3,23 +3,52 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { LandType, LocationMediaCategory, PricingBasis } from "@/lib/supabase/types";
+
+function parseLocationForm(formData: FormData) {
+  const name = (formData.get("name") as string)?.trim();
+  const size = (formData.get("size") as string)?.trim();
+  const city = (formData.get("city") as string)?.trim();
+  const address = (formData.get("address") as string)?.trim() || null;
+  const land_type = ((formData.get("landType") as LandType) || "crown") as LandType;
+  const priceRaw = (formData.get("pricePerMonth") as string)?.trim();
+  const price_per_month = priceRaw ? Number(priceRaw.replace(/,/g, "")) : null;
+  const pricing_basis = ((formData.get("pricingBasis") as PricingBasis) || "monthly") as PricingBasis;
+  const price_label = (formData.get("priceLabel") as string)?.trim() || null;
+  const facing_from = (formData.get("facingFrom") as string)?.trim() || null;
+  const facing_towards = (formData.get("facingTowards") as string)?.trim() || null;
+  const media_category = ((formData.get("mediaCategory") as LocationMediaCategory) || "static") as LocationMediaCategory;
+  const public_image_path = (formData.get("publicImagePath") as string)?.trim() || null;
+
+  return {
+    name,
+    size,
+    city,
+    address,
+    land_type,
+    price_per_month: Number.isFinite(price_per_month) ? price_per_month : null,
+    price_label,
+    pricing_basis,
+    facing_from,
+    facing_towards,
+    media_category,
+    public_image_path,
+  };
+}
 
 export async function createLocation(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
-  const name = (formData.get("name") as string)?.trim();
-  const size = (formData.get("size") as string)?.trim();
-  const city = (formData.get("city") as string)?.trim();
-  const address = (formData.get("address") as string)?.trim() || null;
-  const land_type = (formData.get("landType") as string) || "crown";
+  const payload = parseLocationForm(formData);
+  const { name, size, city } = payload;
 
   if (!name || !size || !city) return "Name, size, and city are required.";
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("locations")
-    .insert({ name, size, city, address, land_type, is_active: true });
+    .insert({ ...payload, is_active: true });
 
   if (error) return error.message;
 
@@ -32,18 +61,15 @@ export async function updateLocation(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
-  const name = (formData.get("name") as string)?.trim();
-  const size = (formData.get("size") as string)?.trim();
-  const city = (formData.get("city") as string)?.trim();
-  const address = (formData.get("address") as string)?.trim() || null;
-  const land_type = (formData.get("landType") as string) || "crown";
+  const payload = parseLocationForm(formData);
+  const { name, size, city } = payload;
 
   if (!name || !size || !city) return "Name, size, and city are required.";
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("locations")
-    .update({ name, size, city, address, land_type })
+    .update(payload)
     .eq("id", id);
 
   if (error) return error.message;
@@ -66,18 +92,15 @@ export async function createLocationAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
-  const name = (formData.get("name") as string)?.trim();
-  const size = (formData.get("size") as string)?.trim();
-  const city = (formData.get("city") as string)?.trim();
-  const address = (formData.get("address") as string)?.trim() || null;
-  const land_type = (formData.get("landType") as string) || "crown";
+  const payload = parseLocationForm(formData);
+  const { name, size, city } = payload;
 
   if (!name || !size || !city) return "Name, size, and city are required.";
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("locations")
-    .insert({ name, size, city, address, land_type, is_active: true })
+    .insert({ ...payload, is_active: true })
     .select("id")
     .single();
 
@@ -110,4 +133,3 @@ export async function createLocationAction(
   revalidatePath("/dashboard");
   return `ok:${locationId}`;
 }
-

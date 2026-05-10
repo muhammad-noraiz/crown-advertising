@@ -1,5 +1,7 @@
-import "dotenv/config";
 import { createClient } from "@supabase/supabase-js";
+import { loadScriptEnv, supabaseHost } from "./load-env";
+
+const loadedEnvFiles = loadScriptEnv();
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +10,8 @@ const supabase = createClient(
 );
 
 async function main() {
+  console.log(`Using env: ${loadedEnvFiles.join(", ")} (${supabaseHost()})`);
+
   const email = "admin@crownadvertising.com";
   const password = "admin123";
 
@@ -36,4 +40,3 @@ async function main() {
 }
 
 main().catch(console.error);
-

@@ -84,6 +84,75 @@ function LocationModalContent({ onClose }: { onClose: () => void }) {
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Price</label>
+                <input
+                  name="pricePerMonth"
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="e.g. 1050000"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Pricing Basis</label>
+                <select
+                  name="pricingBasis"
+                  defaultValue="monthly"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                >
+                  <option value="monthly">Monthly rent</option>
+                  <option value="slot">Digital slot</option>
+                  <option value="on_request">On request</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Display Price Label</label>
+              <input
+                name="priceLabel"
+                placeholder="e.g. 1.05 Million or Rate per slot: 600,000"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Facing From</label>
+                <input
+                  name="facingFrom"
+                  placeholder="e.g. DHA"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Towards</label>
+                <input
+                  name="facingTowards"
+                  placeholder="e.g. Airport"
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Media Category</label>
+              <select
+                name="mediaCategory"
+                defaultValue="static"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+              >
+                <option value="static">Static OOH</option>
+                <option value="motorway">M-2 & Ring Road</option>
+                <option value="digital">Digital SMD</option>
+                <option value="bridge-panel">Bridge Panels</option>
+                <option value="toll-plaza">Toll Plazas</option>
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Land Type <span className="text-red-500">*</span>

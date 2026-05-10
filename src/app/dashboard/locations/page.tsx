@@ -7,6 +7,16 @@ import Link from "next/link";
 
 const PAGE_SIZE = 12;
 
+function formatLocationPrice(location: LocationWithBookings) {
+  if (location.price_label) return location.price_label;
+  if (location.price_per_month === null) return "Price on request";
+
+  const amount = new Intl.NumberFormat("en-PK", { maximumFractionDigits: 0 }).format(location.price_per_month);
+  if (location.pricing_basis === "slot") return `PKR ${amount} / slot`;
+  if (location.pricing_basis === "on_request") return `PKR ${amount}`;
+  return `PKR ${amount} / month`;
+}
+
 export default async function LocationsPage({
   searchParams,
 }: {
@@ -20,26 +30,27 @@ export default async function LocationsPage({
   const supabase = await createClient();
 
   // Total count for pagination
-  const { count } = await supabase
+  const { count, error: countError } = await supabase
     .from("locations")
     .select("id", { count: "exact", head: true });
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   // Paginated locations with bookings
-  const { data } = await supabase
+  const { data, error: locationsError } = await supabase
     .from("locations")
     .select("*, bookings(*)")
     .order("name")
     .range(from, to);
   const locations = (data ?? []) as LocationWithBookings[];
+  const queryError = countError ?? locationsError;
 
   const now = new Date();
   const locationsWithActive = locations.map((loc) => ({
     ...loc,
     activeBooking: loc.bookings
-      .filter((b) => new Date(b.end_date) >= now)
-      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())[0] ?? null,
+      .filter((b) => new Date(b.start_date) <= now && new Date(b.end_date) >= now)
+      .sort((a, b) => new Date(a.end_date).getTime() - new Date(b.end_date).getTime())[0] ?? null,
   }));
 
   const occupied = locationsWithActive.filter((l) => l.activeBooking).length;
@@ -59,9 +70,20 @@ export default async function LocationsPage({
       </div>
 
       {/* Grid */}
-      {locations.length === 0 ? (
+      {queryError ? (
+        <div className="bg-red-50 rounded-xl border border-red-200 p-6">
+          <p className="font-semibold text-red-700">Could not load locations from Supabase.</p>
+          <p className="mt-1 text-sm text-red-600">{queryError.message}</p>
+          <p className="mt-3 text-sm text-red-500">
+            Check that the app and seed command are using the same Supabase environment and that the latest migration has been applied.
+          </p>
+        </div>
+      ) : locations.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-16 text-center">
           <p className="text-slate-400 mb-4">No locations added yet.</p>
+          <p className="mb-6 text-sm text-slate-400">
+            If you already seeded, confirm the seed command and the running app point to the same Supabase environment.
+          </p>
           <AddLocationModal />
         </div>
       ) : (
@@ -102,6 +124,7 @@ export default async function LocationsPage({
                   <span>·</span>
                   <span>{loc.city}</span>
                 </div>
+                <p className="mt-2 text-sm font-semibold text-slate-800">{formatLocationPrice(loc)}</p>
 
                 {activeBooking && (
                   <div className="mt-3 pt-3 border-t border-slate-100">
@@ -119,4 +142,3 @@ export default async function LocationsPage({
     </div>
   );
 }
-
