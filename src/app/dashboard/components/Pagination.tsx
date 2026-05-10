@@ -5,13 +5,23 @@ interface PaginationProps {
   totalPages: number;
   /** Base path, e.g. "/dashboard/locations" */
   basePath: string;
+  query?: Record<string, string | undefined>;
 }
 
-export function Pagination({ page, totalPages, basePath }: PaginationProps) {
+export function Pagination({ page, totalPages, basePath, query = {} }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const prev = page - 1;
   const next = page + 1;
+
+  function hrefFor(targetPage: number) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value) params.set(key, value);
+    }
+    params.set("page", String(targetPage));
+    return `${basePath}?${params.toString()}`;
+  }
 
   // Build up to 5 page numbers around the current page
   const pages: (number | "…")[] = [];
@@ -46,7 +56,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
       <div className="flex items-center gap-1">
         {/* Prev */}
         <Link
-          href={`${basePath}?page=${prev}`}
+          href={hrefFor(prev)}
           className={linkCls(false, page === 1)}
           aria-disabled={page === 1}
           tabIndex={page === 1 ? -1 : undefined}
@@ -63,7 +73,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
               …
             </span>
           ) : (
-            <Link key={p} href={`${basePath}?page=${p}`} className={linkCls(p === page)}>
+            <Link key={p} href={hrefFor(p)} className={linkCls(p === page)}>
               {p}
             </Link>
           )
@@ -71,7 +81,7 @@ export function Pagination({ page, totalPages, basePath }: PaginationProps) {
 
         {/* Next */}
         <Link
-          href={`${basePath}?page=${next}`}
+          href={hrefFor(next)}
           className={linkCls(false, page === totalPages)}
           aria-disabled={page === totalPages}
           tabIndex={page === totalPages ? -1 : undefined}

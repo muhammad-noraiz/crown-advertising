@@ -11,15 +11,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:seed": "npx tsx scripts/seed.ts",
-    "db:seed:local": "npx tsx scripts/seed.ts --env=.env.development",
-    "db:seed:all": "npx tsx scripts/seed.ts && npx tsx scripts/seed-media-locations.ts",
-    "db:seed:all:local": "npx tsx scripts/seed.ts --env=.env.development && npx tsx scripts/seed-media-locations.ts --env=.env.development",
-    "db:seed:media-locations": "npx tsx scripts/seed-media-locations.ts",
-    "db:seed:media-locations:local": "npx tsx scripts/seed-media-locations.ts --env=.env.development",
-    "db:seed:media-locations:remote": "npx tsx scripts/seed-media-locations.ts --env=.env",
-    "db:setup": "supabase start && supabase db reset && npm run db:seed:all:local",
-    "env:local": "cp .env.development .env.local && echo '✅ Switched to LOCAL Supabase'",
-    "env:remote": "cp .env.remote .env.local && echo '✅ Switched to REMOTE Supabase (jiqkfkmjiquyelrnfsni)'"
+    "db:setup": "supabase start && supabase db reset && npm run db:seed"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",

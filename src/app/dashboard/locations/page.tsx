@@ -3,9 +3,17 @@ import { bookingStatus } from "@/lib/utils";
 import type { LocationWithBookings } from "@/lib/supabase/types";
 import { AddLocationModal } from "./AddLocationModal";
 import { Pagination } from "@/app/dashboard/components/Pagination";
+import { SearchBox } from "@/app/dashboard/components/SearchBox";
 import Link from "next/link";
 
 const PAGE_SIZE = 12;
+const LOCATION_SEARCH_COLUMNS = ["name", "size", "city", "address", "price_label", "facing_from", "facing_towards", "media_category"];
+
+function searchFilter(columns: string[], query: string) {
+  const value = query.replace(/[%(),]/g, " ").trim().replace(/\s+/g, "%");
+  if (!value) return null;
+  return columns.map((column) => `${column}.ilike.%${value}%`).join(",");
+}
 
 function formatLocationPrice(location: LocationWithBookings) {
   if (location.price_label) return location.price_label;
@@ -20,9 +28,11 @@ function formatLocationPrice(location: LocationWithBookings) {
 export default async function LocationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
-  const { page: pageStr } = await searchParams;
+  const { page: pageStr, q: rawQuery } = await searchParams;
+  const q = rawQuery?.trim() ?? "";
+  const filter = searchFilter(LOCATION_SEARCH_COLUMNS, q);
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -30,18 +40,21 @@ export default async function LocationsPage({
   const supabase = await createClient();
 
   // Total count for pagination
-  const { count, error: countError } = await supabase
+  const countRequest = supabase
     .from("locations")
     .select("id", { count: "exact", head: true });
+  if (filter) countRequest.or(filter);
+  const { count, error: countError } = await countRequest;
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   // Paginated locations with bookings
-  const { data, error: locationsError } = await supabase
+  const locationsRequest = supabase
     .from("locations")
     .select("*, bookings(*)")
-    .order("name")
-    .range(from, to);
+    .order("name");
+  if (filter) locationsRequest.or(filter);
+  const { data, error: locationsError } = await locationsRequest.range(from, to);
   const locations = (data ?? []) as LocationWithBookings[];
   const queryError = countError ?? locationsError;
 
@@ -69,6 +82,12 @@ export default async function LocationsPage({
         <AddLocationModal />
       </div>
 
+      <SearchBox
+        basePath="/dashboard/locations"
+        defaultValue={q}
+        placeholder="Search locations by name, city, size, route, price..."
+      />
+
       {/* Grid */}
       {queryError ? (
         <div className="bg-red-50 rounded-xl border border-red-200 p-6">
@@ -82,7 +101,7 @@ export default async function LocationsPage({
         <div className="bg-white rounded-xl border border-slate-200 p-16 text-center">
           <p className="text-slate-400 mb-4">No locations added yet.</p>
           <p className="mb-6 text-sm text-slate-400">
-            If you already seeded, confirm the seed command and the running app point to the same Supabase environment.
+            {q ? "No locations match your search." : "If you already seeded, confirm the seed command and the running app point to the same Supabase environment."}
           </p>
           <AddLocationModal />
         </div>
@@ -138,7 +157,7 @@ export default async function LocationsPage({
         </div>
       )}
 
-      <Pagination page={page} totalPages={totalPages} basePath="/dashboard/locations" />
+      <Pagination page={page} totalPages={totalPages} basePath="/dashboard/locations" query={{ q }} />
     </div>
   );
 }

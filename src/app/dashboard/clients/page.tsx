@@ -4,28 +4,37 @@ import { AddClientModal } from "./AddClientModal";
 import { EditClientModal } from "./EditClientModal";
 import { DeleteClientButton } from "./DeleteClientButton";
 import { Pagination } from "@/app/dashboard/components/Pagination";
+import { SearchBox } from "@/app/dashboard/components/SearchBox";
 import Link from "next/link";
 
 const PAGE_SIZE = 20;
+const CLIENT_SEARCH_COLUMNS = ["name", "company", "phone", "email", "address", "notes"];
+
+function searchFilter(columns: string[], query: string) {
+  const value = query.replace(/[%(),]/g, " ").trim().replace(/\s+/g, "%");
+  if (!value) return null;
+  return columns.map((column) => `${column}.ilike.%${value}%`).join(",");
+}
 
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
-  const { page: pageStr } = await searchParams;
+  const { page: pageStr, q: rawQuery } = await searchParams;
+  const q = rawQuery?.trim() ?? "";
+  const filter = searchFilter(CLIENT_SEARCH_COLUMNS, q);
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   const supabase = await createClient();
-  const [{ data, count }] = await Promise.all([
-    supabase
-      .from("clients")
-      .select("*", { count: "exact" })
-      .order("name")
-      .range(from, to),
-  ]);
+  const clientsRequest = supabase
+    .from("clients")
+    .select("*", { count: "exact" })
+    .order("name");
+  if (filter) clientsRequest.or(filter);
+  const { data, count } = await clientsRequest.range(from, to);
 
   const clients = (data ?? []) as Client[];
   const total = count ?? 0;
@@ -40,6 +49,12 @@ export default async function ClientsPage({
         </div>
         <AddClientModal />
       </div>
+
+      <SearchBox
+        basePath="/dashboard/clients"
+        defaultValue={q}
+        placeholder="Search clients by name, company, phone, email..."
+      />
 
       <div className="bg-white rounded-xl border border-slate-200">
         <div className="overflow-x-auto">
@@ -57,7 +72,7 @@ export default async function ClientsPage({
               {clients.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                    No clients yet. <AddClientModal />
+                    {q ? "No clients match your search." : "No clients yet."} <AddClientModal />
                   </td>
                 </tr>
               ) : (
@@ -86,7 +101,7 @@ export default async function ClientsPage({
         </div>
       </div>
 
-      <Pagination page={page} totalPages={totalPages} basePath="/dashboard/clients" />
+      <Pagination page={page} totalPages={totalPages} basePath="/dashboard/clients" query={{ q }} />
     </div>
   );
 }

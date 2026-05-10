@@ -5,8 +5,10 @@ import type { BookingWithLocation, Booking, Location } from "@/lib/supabase/type
 import { AddBookingModal } from "./AddBookingModal";
 import { EditBookingModal } from "./EditBookingModal";
 import { Pagination } from "@/app/dashboard/components/Pagination";
+import { SearchBox } from "@/app/dashboard/components/SearchBox";
 
 const PAGE_SIZE = 20;
+const BOOKING_SEARCH_COLUMNS = ["client_name", "sale_person", "vendor", "locking_ref", "invoice_no", "duration", "remarks"];
 
 const invoiceStatusLabel: Record<string, { label: string; cls: string }> = {
   PENDING: { label: "Pending", cls: "bg-yellow-100 text-yellow-700" },
@@ -21,29 +23,51 @@ const bookingStatusLabel: Record<string, { label: string; cls: string }> = {
   expired: { label: "Expired", cls: "bg-red-100 text-red-700" },
 };
 
+function cleanSearchValue(query: string) {
+  return query.replace(/[%(),]/g, " ").trim().replace(/\s+/g, "%");
+}
+
+function matchesLocationSearch(location: { name: string; size: string; city: string }, query: string) {
+  const needle = query.toLowerCase();
+  return [location.name, location.size, location.city].some((value) => value.toLowerCase().includes(needle));
+}
+
+function bookingSearchFilter(query: string, locationIds: number[]) {
+  const value = cleanSearchValue(query);
+  if (!value) return null;
+  const filters = BOOKING_SEARCH_COLUMNS.map((column) => `${column}.ilike.%${value}%`);
+  if (locationIds.length > 0) filters.push(`location_id.in.(${locationIds.join(",")})`);
+  return filters.join(",");
+}
+
 export default async function BookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; q?: string }>;
 }) {
-  const { page: pageStr } = await searchParams;
+  const { page: pageStr, q: rawQuery } = await searchParams;
+  const q = rawQuery?.trim() ?? "";
   const page = Math.max(1, parseInt(pageStr ?? "1", 10));
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   const supabase = await createClient();
-  const [{ data, count }, { data: locationData }, { data: clientsData }] = await Promise.all([
-    supabase
-      .from("bookings")
-      .select("*, locations(id, name)", { count: "exact" })
-      .order("start_date", { ascending: false })
-      .range(from, to),
+  const [{ data: locationData }, { data: clientsData }] = await Promise.all([
     supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
     supabase.from("clients").select("id, name").order("name"),
   ]);
-  const bookings = (data ?? []) as BookingWithLocation[];
   const locations = (locationData ?? []) as { id: number; name: string; size: string; city: string }[];
   const clients = (clientsData ?? []) as { id: number; name: string }[];
+  const matchingLocationIds = q ? locations.filter((location) => matchesLocationSearch(location, q)).map((location) => location.id) : [];
+  const filter = q ? bookingSearchFilter(q, matchingLocationIds) : null;
+  const bookingsRequest = supabase
+    .from("bookings")
+    .select("*, locations(id, name)", { count: "exact" })
+    .order("start_date", { ascending: false });
+  if (filter) bookingsRequest.or(filter);
+
+  const { data, count } = await bookingsRequest.range(from, to);
+  const bookings = (data ?? []) as BookingWithLocation[];
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -57,6 +81,12 @@ export default async function BookingsPage({
         </div>
         <AddBookingModal locations={locations} clients={clients} />
       </div>
+
+      <SearchBox
+        basePath="/dashboard/bookings"
+        defaultValue={q}
+        placeholder="Search bookings by location, client, invoice, vendor, remarks..."
+      />
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200">
@@ -77,7 +107,7 @@ export default async function BookingsPage({
               {bookings.length === 0 ? (
                 <tr>
                   <td colSpan={13} className="px-6 py-12 text-center text-slate-400">
-                    No bookings yet.{" "}
+                    {q ? "No bookings match your search." : "No bookings yet."}{" "}
                     <AddBookingModal
                       locations={locations}
                       clients={clients}
@@ -134,7 +164,7 @@ export default async function BookingsPage({
         </div>
       </div>
 
-      <Pagination page={page} totalPages={totalPages} basePath="/dashboard/bookings" />
+      <Pagination page={page} totalPages={totalPages} basePath="/dashboard/bookings" query={{ q }} />
     </div>
   );
 }
