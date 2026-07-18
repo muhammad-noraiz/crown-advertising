@@ -127,10 +127,13 @@ export async function recordInvoicePayment(
     return "ok";
   }
 
-  const ledgerUnavailable = ledgerError.code === "PGRST202"
+  const rpcUnavailable = ledgerError.code === "PGRST202"
     || ledgerError.code === "42883"
     || ledgerError.message.toLowerCase().includes("record_invoice_payment");
-  if (!ledgerUnavailable) return ledgerError.message;
+  const enumAssignmentMismatch = ledgerError.code === "42804"
+    && ledgerError.message.toLowerCase().includes("invoice_status")
+    && ledgerError.message.toLowerCase().includes("text");
+  if (!rpcUnavailable && !enumAssignmentMismatch) return ledgerError.message;
 
   const { data, error: readError } = await supabase
     .from("booking_invoices")

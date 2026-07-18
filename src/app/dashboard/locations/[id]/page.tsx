@@ -79,7 +79,7 @@ export default async function LocationDetailPage({
       supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
       supabase.from("location_expenses").select("*").eq("location_id", Number(id)).order("expense_date", { ascending: false }),
       supabase.from("location_partners").select("*").eq("location_id", Number(id)).order("partner_name"),
-      supabase.from("clients").select("id, name").order("name"),
+      supabase.from("clients").select("id, name, email").order("name"),
       supabase.from("location_images").select("*").eq("location_id", Number(id)).order("created_at", { ascending: false }),
     ]);
 
@@ -89,7 +89,8 @@ export default async function LocationDetailPage({
   const locations = (allLocations ?? []) as { id: number; name: string; size: string; city: string }[];
   const expenses = (expensesData ?? []) as LocationExpense[];
   const partners = (partnersData ?? []) as LocationPartner[];
-  const clients = (clientsData ?? []) as { id: number; name: string }[];
+  const clients = (clientsData ?? []) as { id: number; name: string; email: string | null }[];
+  const clientEmailById = new Map(clients.map((client) => [client.id, client.email]));
   const images = (imagesData ?? []) as LocationImage[];
   const now = new Date();
   const activeBooking = loc.bookings.find((b) => new Date(b.start_date) <= now && new Date(b.end_date) >= now);
@@ -222,7 +223,7 @@ export default async function LocationDetailPage({
                           <td className="px-4 py-3 text-slate-400 text-xs max-w-32 truncate">{b.remarks ?? "—"}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <InvoiceManagerModal booking={b as Booking} invoices={invoices} locationName={loc.name} />
+                              <InvoiceManagerModal booking={b as Booking} invoices={invoices} locationName={loc.name} clientEmail={b.client_id ? clientEmailById.get(b.client_id) : null} />
                               <EditBookingModal booking={b as Booking} location={loc} clients={clients} />
                               <DeleteBookingButton id={b.id} locationId={loc.id} />
                             </div>

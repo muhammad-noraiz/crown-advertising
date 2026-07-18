@@ -17,6 +17,7 @@ import {
 } from "@/lib/invoices";
 import { formatDate, toInputDate } from "@/lib/utils";
 import type { Booking, BookingInvoice } from "@/lib/supabase/types";
+import { InvoiceDocumentActions } from "./InvoiceDocumentActions";
 
 const statusStyles = {
   NOT_SETUP: { label: "Not set up", cls: "bg-slate-100 text-slate-600" },
@@ -172,9 +173,10 @@ interface Props {
   booking: Booking;
   invoices: BookingInvoice[];
   locationName?: string;
+  clientEmail?: string | null;
 }
 
-export function InvoiceManagerModal({ booking, invoices, locationName }: Props) {
+export function InvoiceManagerModal({ booking, invoices, locationName, clientEmail }: Props) {
   const [open, setOpen] = useState(false);
   const totals = getInvoiceTotals(invoices);
   const bookingStatus = getBookingInvoiceStatus(invoices);
@@ -276,6 +278,15 @@ export function InvoiceManagerModal({ booking, invoices, locationName }: Props) 
                       {invoice.last_payment_date && (
                         <p className="mt-3 text-[11px] text-slate-400">Last payment {formatDate(invoice.last_payment_date)}{invoice.payment_reference ? ` · ${invoice.payment_reference}` : ""}</p>
                       )}
+                      <InvoiceDocumentActions
+                        invoiceId={invoice.id}
+                        invoiceNo={invoice.invoice_no}
+                        clientName={booking.client_name}
+                        clientEmail={clientEmail}
+                        outstanding={outstanding}
+                        paidAmount={invoice.paid_amount}
+                        cancelled={status === "CANCELLED"}
+                      />
                     </article>
                   );
                 })}

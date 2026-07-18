@@ -77,12 +77,13 @@ export default async function BookingsPage({
   const supabase = await createClient();
   const [{ data: locationData }, { data: clientsData }, { data: invoiceData }] = await Promise.all([
     supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
-    supabase.from("clients").select("id, name").order("name"),
+    supabase.from("clients").select("id, name, email").order("name"),
     supabase.from("booking_invoices").select("*"),
   ]);
 
   const locations = (locationData ?? []) as { id: number; name: string; size: string; city: string }[];
-  const clients = (clientsData ?? []) as { id: number; name: string }[];
+  const clients = (clientsData ?? []) as { id: number; name: string; email: string | null }[];
+  const clientEmailById = new Map(clients.map((client) => [client.id, client.email]));
   const allInvoices = (invoiceData ?? []) as BookingInvoice[];
   const globalTotals = getInvoiceTotals(allInvoices);
   const invoiceGroups = new Map<number, BookingInvoice[]>();
@@ -225,8 +226,15 @@ export default async function BookingsPage({
                         <p className="font-medium text-slate-800 dark:text-slate-200">{formatDate(booking.start_date)} → {formatDate(booking.end_date)}</p>
                         <p className="mt-1 text-slate-400">{booking.duration}</p>
                       </td>
-                      <td className="px-4 py-4">
-                        <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                      <td className="min-w-[158px] px-4 py-4">
+                        <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-[11px] font-bold leading-none ${
+                          booking.billing_type === "monthly"
+                            ? "border-[#f4d98c] bg-[#fff8e6] text-[#8a5a00] dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300"
+                            : "border-[#dbe6f3] bg-[#f2f6fb] text-[#425b78] dark:border-slate-600 dark:bg-slate-700/60 dark:text-slate-200"
+                        }`}>
+                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
+                            {booking.billing_type === "monthly" ? <><path d="M4 5.5h12v10H4z" /><path d="M6.5 3.5v4M13.5 3.5v4M4 8.5h12" /></> : <><path d="M4 4.5h12v11H4z" /><path d="M7 8h6M7 11h6" /><path d="m12.5 13.5 1.5 1.5 2.5-3" /></>}
+                          </svg>
                           {billingTypeLabel(booking.billing_type ?? "end_of_term")}
                         </span>
                       </td>
@@ -249,7 +257,7 @@ export default async function BookingsPage({
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3 whitespace-nowrap">
-                          <InvoiceManagerModal booking={booking as Booking} invoices={invoices} locationName={location?.name} />
+                          <InvoiceManagerModal booking={booking as Booking} invoices={invoices} locationName={location?.name} clientEmail={booking.client_id ? clientEmailById.get(booking.client_id) : null} />
                           <EditBookingModal
                             booking={booking as Booking}
                             location={(location ?? { id: booking.location_id, name: "—", size: "—", city: "—" }) as Pick<Location, "id" | "name" | "size" | "city">}
