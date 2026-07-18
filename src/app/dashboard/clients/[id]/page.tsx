@@ -2,14 +2,18 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, bookingStatus } from "@/lib/utils";
-import type { Client, Booking, Location } from "@/lib/supabase/types";
+import type { Client, Booking, BookingInvoice, Location } from "@/lib/supabase/types";
 import { EditClientModal } from "@/app/dashboard/clients/EditClientModal";
 import { DeleteClientButton } from "@/app/dashboard/clients/DeleteClientButton";
 import { EditBookingModal } from "@/app/dashboard/bookings/EditBookingModal";
+import { InvoiceManagerModal } from "@/app/dashboard/bookings/InvoiceManagerModal";
+import { getBookingInvoiceStatus, getInvoiceTotals } from "@/lib/invoices";
 
 const invoiceStatusLabel: Record<string, { label: string; cls: string }> = {
-  PENDING: { label: "Pending", cls: "bg-yellow-100 text-yellow-700" },
-  PAID: { label: "Paid", cls: "bg-green-100 text-green-700" },
+  NOT_SETUP: { label: "Not set up", cls: "bg-slate-100 text-slate-600" },
+  PENDING: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
+  PARTIAL: { label: "Part paid", cls: "bg-blue-100 text-blue-700" },
+  PAID: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
   OVERDUE: { label: "Overdue", cls: "bg-red-100 text-red-700" },
   CANCELLED: { label: "Cancelled", cls: "bg-slate-100 text-slate-500" },
 };
@@ -22,7 +26,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     supabase.from("clients").select("*").eq("id", Number(id)).single(),
     supabase
       .from("bookings")
-      .select("*, locations(id, name, size, city)")
+      .select("*, locations(id, name, size, city), booking_invoices(*)")
       .eq("client_id", Number(id))
       .order("start_date", { ascending: false }),
     supabase.from("clients").select("id, name").order("name"),
@@ -33,6 +37,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const client = clientData as Client;
   const bookings = (bookingsData ?? []) as (Booking & {
     locations: Pick<Location, "id" | "name" | "size" | "city"> | null;
+    booking_invoices: BookingInvoice[];
   })[];
   const allClients = (clientsData ?? []) as { id: number; name: string }[];
 
@@ -112,7 +117,9 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                   const bs = bookingStatus(b.end_date);
                   const bsCls = bs === "active" ? "bg-green-100 text-green-700" : bs === "expiring" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
                   const bsLabel = bs === "active" ? "Active" : bs === "expiring" ? "Expiring Soon" : "Expired";
-                  const isl = invoiceStatusLabel[b.invoice_status] ?? invoiceStatusLabel.PENDING;
+                  const invoices = b.booking_invoices ?? [];
+                  const invoiceTotals = getInvoiceTotals(invoices);
+                  const isl = invoiceStatusLabel[getBookingInvoiceStatus(invoices)] ?? invoiceStatusLabel.PENDING;
                   return (
                     <tr key={b.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-4 py-3 font-medium text-slate-900">
@@ -128,16 +135,20 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                       <td className="px-4 py-3 font-medium text-slate-800">{(b.amount ?? 0).toLocaleString()}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isl.cls}`}>{isl.label}</span>
+                        <p className="mt-1 text-[10px] text-slate-400">PKR {Math.round(invoiceTotals.outstanding).toLocaleString()} due</p>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${bsCls}`}>{bsLabel}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <EditBookingModal
-                          booking={b as Booking}
-                          location={(b.locations ?? { id: b.location_id, name: "—", size: "—", city: "—" }) as Pick<Location, "id" | "name" | "size" | "city">}
-                          clients={allClients}
-                        />
+                        <div className="flex items-center gap-3 whitespace-nowrap">
+                          <InvoiceManagerModal booking={b as Booking} invoices={invoices} locationName={b.locations?.name} />
+                          <EditBookingModal
+                            booking={b as Booking}
+                            location={(b.locations ?? { id: b.location_id, name: "—", size: "—", city: "—" }) as Pick<Location, "id" | "name" | "size" | "city">}
+                            clients={allClients}
+                          />
+                        </div>
                       </td>
                     </tr>
                   );

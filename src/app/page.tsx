@@ -2,6 +2,7 @@ import Image from "next/image";
 import ScrollReveal from "./components/ScrollReveal";
 import AnimatedCounter from "./components/AnimatedCounter";
 import MobileNav from "./components/MobileNav";
+import { landingLocationCategories, landingLocations } from "@/lib/landing-locations";
 
 const contact = {
   phone: "+92-321-4462775",
@@ -43,114 +44,6 @@ const strengths = [
   ["24/7 Support", "Responsive assistance for active campaigns and urgent requirements."],
 ];
 
-const projectGroups = [
-  {
-    id: "lahore",
-    name: "Lahore",
-    kicker: "City coverage",
-    description:
-      "High-traffic billboard and route-side campaigns across Lahore's commercial corridors.",
-    images: [
-      ["lahore-01.jpg", "Innovative Ad Campaign", "City-wide exposure through high-impact billboard placement."],
-      ["lahore-02.jpg", "Strategic Ad Placement", "Targeting audiences across main roads and commuting routes."],
-      ["lahore-03.jpg", "Dynamic Visual Ads", "Outdoor visibility designed for brand recall and engagement."],
-    ],
-  },
-  {
-    id: "sheikhupura",
-    name: "Sheikhupura",
-    kicker: "Industrial route media",
-    description:
-      "Billboard placements on key Sheikhupura roads and motorway-adjacent traffic points.",
-    images: [
-      ["sheikhupura-01.jpg", "Local Business Spotlight", "Community-focused advertising for regional visibility."],
-      ["sheikhupura-02.jpg", "High-Impact Event Advertising", "Roadside media that supports launches and event campaigns."],
-      ["sheikhupura-03.jpg", "Brand Development Roadmap", "Strategic outdoor placements for repeat exposure."],
-    ],
-  },
-  {
-    id: "faisalabad",
-    name: "Faisalabad",
-    kicker: "Retail and textile city reach",
-    description:
-      "Campaigns positioned around Faisalabad's road networks, markets, and brand-sensitive locations.",
-    images: [
-      ["faisalabad-01.jpg", "Social Marketing Strategy", "Broad-audience outdoor campaigns for consumer attention."],
-      ["faisalabad-02.jpg", "Lifestyle Branding", "Aspirational visuals placed around active city routes."],
-      ["faisalabad-03.jpg", "Cultural Celebrations", "Themed outdoor advertising that resonates locally."],
-    ],
-  },
-  {
-    id: "gujranwala",
-    name: "Gujranwala",
-    kicker: "Urban visibility",
-    description:
-      "Strong outdoor coverage around city arteries, commercial points, and commuter movement.",
-    images: [
-      ["gujranwala-01.jpg", "Innovative Ad Campaign", "Impactful billboard advertising for maximum city-wide exposure."],
-      ["gujranwala-02.jpg", "Creative Branding Campaigns", "Distinct campaign visuals that strengthen business identity."],
-      ["gujranwala-03.jpg", "Targeted Audience Engagement", "High-traffic placements for focused audience reach."],
-    ],
-  },
-  {
-    id: "sialkot",
-    name: "Sialkot",
-    kicker: "Export city campaigns",
-    description:
-      "Outdoor media for business districts, retail zones, and route-based brand awareness in Sialkot.",
-    images: [
-      ["sialkot-01.jpg", "Targeted Visibility", "Audience-specific messaging in active commercial areas."],
-      ["sialkot-02.jpg", "Creative Branding Campaigns", "Large-format media for stronger brand identity."],
-      ["sialkot-03.jpg", "Digital Marketing Solutions", "Integrated visibility for business growth and awareness."],
-    ],
-  },
-  {
-    id: "rawalpindi",
-    name: "Rawalpindi",
-    kicker: "Twin-city access",
-    description:
-      "Billboard campaigns around high-movement Rawalpindi roads and regional access points.",
-    images: [
-      ["rawalpindi-01.jpg", "Creative Branding Campaigns", "Consistent outdoor visibility for local and regional brands."],
-      ["rawalpindi-02.jpg", "Creative Branding Campaigns", "Repeated exposure through route-side placement."],
-      ["rawalpindi-03.jpg", "Creative Branding Campaigns", "Outdoor media that keeps brands visible in daily traffic."],
-    ],
-  },
-  {
-    id: "multan",
-    name: "Multan",
-    kicker: "Southern Punjab reach",
-    description:
-      "Strategic placements across Multan's entry routes, main roads, and active consumer zones.",
-    images: [
-      ["multan-01.jpg", "Digital Marketing Solutions", "Full-range brand visibility for business growth."],
-      ["multan-02.jpg", "Creative Branding Campaigns", "Campaign visuals that build recall across city routes."],
-      ["multan-03.jpg", "Digital Marketing Solutions", "Outdoor presence for city-wide business visibility."],
-      ["multan-04.jpg", "High-Impact Billboards", "Brand awareness through strategically positioned media."],
-    ],
-  },
-  {
-    id: "toll-plazas",
-    name: "Toll Plazas",
-    kicker: "Highway audience capture",
-    description:
-      "Gateway and toll plaza media for repeat exposure across intercity travel and commercial movement.",
-    images: [
-      ["toll-01.jpg", "Target Audience Refinement", "Focused reach across high-potential route traffic."],
-      ["toll-02.jpg", "Consumer Behavior Analysis", "Audience patterns converted into better media placement."],
-      ["toll-03.jpg", "Predictive Market Trends", "Seasonal campaigns built for highway visibility."],
-      ["toll-04.jpg", "Creative Visual Storytelling", "Outdoor visuals that make the brand message memorable."],
-      ["toll-05.jpg", "High-Impact Billboard Visibility", "Large-format visibility across toll routes."],
-      ["toll-06.jpg", "Targeted Audience Engagement", "Tailored messaging for intercity commuters."],
-      ["toll-07.jpg", "Consumer Behavior Analysis", "Campaign visibility around recurring travel routes."],
-      ["toll-08.jpg", "Predictive Market Trends", "Brand recall through seasonal highway media."],
-      ["toll-09.jpg", "Creative Visual Storytelling", "Visual campaigns designed for moving audiences."],
-      ["toll-10.jpg", "Targeted Audience Engagement", "Route-based placement for specific demographics."],
-      ["toll-11.jpg", "Target Audience Refinement", "Focused highway coverage for stronger campaign performance."],
-    ],
-  },
-];
-
 const workflowSteps = [
   "Campaign Planning",
   "Media Buying",
@@ -158,27 +51,6 @@ const workflowSteps = [
   "Installation",
   "Support & Reporting",
 ];
-
-const presenceStats = [
-  "30 Resources",
-  "3 Offices",
-  "Nationwide Coverage",
-  "Logistic Support",
-  "Warehouse Facilities",
-];
-
-const mapPins = [
-  { city: "Peshawar", x: 271.1, y: 173.7 },
-  { city: "Islamabad", x: 307.2, y: 181.6 },
-  { city: "Faisalabad", x: 309.3, y: 234.5 },
-  { city: "Lahore", x: 338.2, y: 232.8 },
-  { city: "Quetta", x: 163.3, y: 264.6 },
-  { city: "Multan", x: 271.1, y: 265.1 },
-  { city: "Karachi", x: 163.9, y: 390.7 },
-];
-
-const pakistanMapPath =
-  "M 376.7 116.1 L 375.3 125.9 L 381.1 131.3 L 390.3 129.1 L 401.2 150.7 L 371.9 162.1 L 336.5 155.9 L 327.8 158.9 L 324.5 164.7 L 329.5 168.9 L 327.8 173.4 L 336.2 175.0 L 328.9 180.4 L 333.5 186.1 L 329.8 193.6 L 337.1 197.9 L 338.0 203.3 L 346.0 201.8 L 346.1 210.3 L 354.0 210.4 L 362.0 215.3 L 342.6 226.0 L 344.4 234.3 L 341.7 241.0 L 345.4 243.2 L 326.2 260.0 L 328.4 264.4 L 314.8 270.6 L 304.4 291.4 L 290.8 298.1 L 279.4 317.2 L 254.7 323.3 L 247.6 315.9 L 243.1 316.0 L 223.9 337.0 L 223.2 346.2 L 238.7 351.1 L 236.5 364.1 L 240.9 370.6 L 250.5 371.4 L 260.4 401.5 L 252.9 405.6 L 247.3 401.0 L 234.3 407.1 L 205.3 403.2 L 204.7 411.9 L 191.3 413.3 L 191.1 418.3 L 187.9 412.5 L 187.9 416.5 L 184.1 413.1 L 179.0 415.8 L 179.3 412.6 L 175.2 413.6 L 176.5 409.4 L 171.0 406.6 L 172.5 402.9 L 167.4 396.0 L 169.9 393.3 L 155.7 391.2 L 157.6 383.1 L 149.1 372.5 L 142.4 376.1 L 148.1 374.2 L 152.0 377.9 L 110.4 379.7 L 108.3 383.4 L 93.9 376.7 L 94.2 379.2 L 82.6 378.7 L 80.9 382.8 L 57.9 381.1 L 54.4 385.3 L 48.8 382.2 L 39.0 386.8 L 40.2 382.9 L 35.6 382.6 L 41.4 358.3 L 51.7 355.1 L 55.3 350.3 L 72.4 348.8 L 76.7 337.2 L 73.3 333.8 L 63.0 333.6 L 63.4 310.4 L 42.8 303.4 L 18.0 272.2 L 56.7 282.9 L 82.6 280.8 L 94.8 283.4 L 104.1 279.1 L 117.3 279.8 L 144.8 272.8 L 148.2 269.9 L 145.4 267.5 L 148.9 247.0 L 156.7 240.5 L 182.0 237.3 L 177.4 232.6 L 190.9 225.6 L 203.6 226.8 L 206.6 230.9 L 218.3 223.0 L 216.8 210.5 L 221.4 206.0 L 222.8 197.1 L 241.9 190.2 L 231.9 173.7 L 247.3 175.5 L 260.1 172.8 L 261.5 165.6 L 257.6 161.5 L 273.8 145.9 L 269.7 131.6 L 262.6 125.6 L 273.1 115.8 L 277.2 117.3 L 295.7 107.2 L 330.6 107.4 L 345.4 101.7 L 350.4 105.2 L 361.8 105.0 L 363.7 109.6 L 370.7 109.6 L 376.7 116.1 Z";
 
 const clients = [
   { name: "Graana",         logo: "/client-logos/graana.png" },
@@ -208,11 +80,11 @@ const clients = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f7f4ec] text-[#0d100b]">
+    <main className="landing-shell min-h-screen overflow-x-hidden bg-[#f7f4ec] text-[#0d100b]">
 
       {/* ─── NAVBAR ──────────────────────────────────────────────── */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-[#0d100b]/90 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/8 bg-[#0d100b]/82 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-[92rem] items-center justify-between px-5 py-4 lg:px-8">
           <a href="#home" className="flex items-center gap-3">
             <Image
               src="/crown-assets/logo.jpg"
@@ -230,8 +102,7 @@ export default function Home() {
             {[
               ["About", "#about"],
               ["Services", "#services"],
-              ["Work", "#work"],
-              ["Locations", "/locations-showcase"],
+              ["Locations", "#locations"],
               ["Contact", "#contact"],
             ].map(([label, href]) => (
               <a
@@ -256,109 +127,133 @@ export default function Home() {
       </header>
 
       {/* ─── HERO ────────────────────────────────────────────────── */}
-      <section id="home" className="relative min-h-screen bg-[#0d100b] pt-24 text-white">
+      <section id="home" className="hero-stage relative isolate min-h-[800px] overflow-hidden bg-[#0d100b] pt-24 text-white lg:min-h-screen">
         <Image
-          src="/crown-assets/hero-billboard.jpg"
-          alt="Outdoor billboard advertising by Crown Advertising"
+          src={landingLocations[0].image}
+          alt="DHA Exit Cantt outdoor advertising placement in Lahore"
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-[0.32]"
+          className="object-cover opacity-25 saturate-[0.7]"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(13,16,11,0.98)_0%,rgba(13,16,11,0.80)_48%,rgba(13,16,11,0.22)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_75%_15%,rgba(212,234,82,0.15),transparent)]" />
-        <div className="absolute bottom-0 inset-x-0 h-56 bg-linear-to-t from-[#f7f4ec] to-transparent" />
+        <div className="absolute inset-0 bg-[linear-gradient(92deg,rgba(13,16,11,1)_0%,rgba(13,16,11,0.93)_46%,rgba(13,16,11,0.48)_100%)]" />
+        <div className="route-grid absolute inset-0 opacity-25" />
+        <div aria-hidden="true" className="hero-wordmark absolute -right-[0.08em] top-[8%] select-none text-[clamp(12rem,30vw,34rem)] font-black leading-none text-white/[0.025]">
+          OOH
+        </div>
+        <div className="absolute left-[5vw] top-36 hidden h-[55vh] w-px bg-linear-to-b from-[#d4ea52] via-[#d4ea52]/25 to-transparent 2xl:block" />
 
-        <div className="relative mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-16 px-5 py-16 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
-          <div className="animate-rise">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-[#d4ea52]/25 bg-[#d4ea52]/10 px-4 py-2">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#d4ea52]" />
-              <span className="text-[11px] font-black uppercase tracking-[0.22em] text-[#d4ea52]">
-                Indoor &amp; Outdoor Media Since 2006
+        <div className="relative mx-auto grid min-h-[calc(100vh-6rem)] max-w-[92rem] items-center gap-16 px-5 py-16 lg:grid-cols-[1.04fr_0.96fr] lg:px-8 xl:gap-24">
+          <div className="animate-rise relative z-10">
+            <div className="inline-flex items-center gap-3 border-l-2 border-[#d4ea52] pl-4">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[#d4ea52] shadow-[0_0_0_6px_rgba(212,234,82,0.1)]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.32em] text-[#d4ea52]">
+                Pakistan&apos;s outdoor media partner since 2006
               </span>
             </div>
-            <h1 className="mt-8 text-[clamp(2.8rem,6vw,5.6rem)] font-black leading-[0.93] tracking-tight">
-              Turn high-traffic
-              <br />
-              locations into
-              <br />
-              <span className="text-[#d4ea52]">brand growth.</span>
+
+            <h1 className="mt-10 max-w-5xl text-[clamp(3.4rem,7vw,7.4rem)] font-black leading-[0.84] tracking-[-0.055em]">
+              Own the road.
+              <span className="mt-2 block text-[#d4ea52]">Stay in mind.</span>
             </h1>
-            <p className="mt-7 max-w-130 text-lg leading-[1.75] text-white/65">
-              Crown Advertising helps Pakistani brands plan, produce, and place memorable outdoor, retail, and B2B advertising campaigns across the country.
+            <p className="mt-8 max-w-2xl border-l border-white/15 pl-5 text-base leading-[1.85] text-white/62 sm:text-lg">
+              Crown helps brands stay visible across Pakistan through strategic outdoor media, bold production, and dependable multi-city campaign execution.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <a href="#work" className="rounded-full bg-[#d4ea52] px-7 py-4 text-sm font-black uppercase tracking-[0.12em] text-[#0d100b] shadow-[0_12px_36px_rgba(212,234,82,0.28)] transition hover:-translate-y-0.5 hover:bg-white">
-                Explore Projects
+
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <a href="#locations" className="group inline-flex items-center gap-4 rounded-full bg-[#d4ea52] px-7 py-4 text-xs font-black uppercase tracking-[0.14em] text-[#0d100b] shadow-[0_14px_40px_rgba(212,234,82,0.22)] transition duration-300 hover:-translate-y-1 hover:bg-white">
+                Explore featured inventory
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#0d100b] text-white transition group-hover:rotate-45">
+                  <svg aria-hidden="true" viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none">
+                    <path d="M3 13 13 3m0 0H6m7 0v7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                  </svg>
+                </span>
               </a>
-              <a href="/locations-showcase" className="rounded-full border border-white/20 px-7 py-4 text-sm font-black uppercase tracking-[0.12em] text-white transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/8">
-                View Locations
+              <a href="#contact" className="rounded-full border border-white/18 px-7 py-4 text-xs font-black uppercase tracking-[0.14em] text-white transition duration-300 hover:-translate-y-1 hover:border-[#d4ea52] hover:text-[#d4ea52]">
+                Start a campaign
               </a>
             </div>
-            <div className="mt-12 flex flex-wrap gap-8 border-t border-white/10 pt-8">
+
+            <div className="mt-14 grid max-w-2xl grid-cols-3 border-y border-white/10 py-5">
               {[
-                ["18+", "Years Experience"],
-                ["8", "Cities Covered"],
-                ["360°", "Media Solutions"],
-              ].map(([num, label]) => (
-                <div key={label} className="flex items-baseline gap-2">
-                  <AnimatedCounter value={num} className="text-3xl font-black text-[#d4ea52]" />
-                  <span className="text-sm text-white/50">{label}</span>
+                ["18+", "Years building visibility"],
+                ["31", "Lahore sites featured"],
+                ["2", "Media formats"],
+              ].map(([num, label], index) => (
+                <div key={label} className={index === 0 ? "pr-4" : "border-l border-white/10 px-4"}>
+                  <AnimatedCounter value={num} className="block text-3xl font-black leading-none text-[#d4ea52] sm:text-4xl" />
+                  <span className="mt-2 block max-w-28 text-[9px] font-bold uppercase leading-[1.5] tracking-[0.16em] text-white/38">{label}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="animate-float hidden lg:block">
-            <div className="rounded-4xl border border-white/10 bg-white/6 p-3 shadow-[0_40px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-              <div className="overflow-hidden rounded-3xl">
-                <div className="relative aspect-4/3">
-                  <Image
-                    src="/crown-assets/project-lahore.jpg"
-                    alt="Crown Advertising billboard project Lahore"
-                    fill
-                    sizes="40vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-[#0d100b]/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d4ea52]">Featured Project</p>
-                    <p className="mt-1 text-base font-black text-white leading-tight">Lahore City Campaigns</p>
+          <div className="animate-float relative hidden lg:block">
+            <div className="absolute -left-10 top-16 z-20 -rotate-6 bg-[#d4ea52] px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#0d100b] shadow-xl">
+              Latest media deck · 27.06.26
+            </div>
+            <div className="relative rotate-[1.5deg] border border-white/12 bg-[#151912] p-3 shadow-[0_50px_100px_rgba(0,0,0,0.52)] transition duration-500 hover:rotate-0">
+              <div className="relative aspect-[5/4] overflow-hidden bg-[#20251b]">
+                <Image
+                  src={landingLocations[0].image}
+                  alt="DHA Exit Cantt Crown Advertising placement"
+                  fill
+                  sizes="45vw"
+                  className="object-cover transition duration-1000 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0d100b]/88 via-transparent to-transparent" />
+                <span className="absolute right-5 top-4 text-7xl font-black leading-none text-white/18">03</span>
+                <div className="absolute inset-x-6 bottom-6">
+                  <p className="text-[9px] font-black uppercase tracking-[0.28em] text-[#d4ea52]">Featured placement · Lahore</p>
+                  <p className="mt-2 text-2xl font-black leading-none">DHA Exit Cantt</p>
+                  <div className="mt-4 flex items-center gap-3 text-xs font-bold text-white/55">
+                    <span>DHA Main Boulevard</span>
+                    <span className="text-[#d4ea52]">→</span>
+                    <span>Cavalry Ground</span>
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 p-3">
-                {[
-                  ["30+", "Resources"],
-                  ["3", "Offices"],
-                  ["NTN", "Registered"],
-                ].map(([value, label]) => (
-                  <div key={label} className="rounded-xl bg-white/[0.07] p-3 text-center">
-                    <p className="text-xl font-black text-white">{value}</p>
-                    <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-[#d4ea52]/75">{label}</p>
-                  </div>
-                ))}
+              <div className="grid grid-cols-[1fr_auto] items-center gap-4 border-t border-white/8 px-3 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-[#d4ea52]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/52">60x40 premium static OOH</span>
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#d4ea52]">LHR / 01</span>
               </div>
             </div>
+            <div className="absolute -bottom-7 -right-7 -z-10 h-full w-full border border-[#d4ea52]/25" />
           </div>
-        </div>
-
-        <div className="absolute bottom-20 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex">
-          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/30">Scroll</span>
-          <div className="h-8 w-px animate-bounce rounded-full bg-linear-to-b from-white/30 to-transparent" />
         </div>
       </section>
 
+      <div className="overflow-hidden border-y border-[#0d100b] bg-[#d4ea52] py-3.5 text-[#0d100b]">
+        <div className="campaign-ticker flex w-max items-center">
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex items-center">
+              {["OOH Static Media", "Bridge Panels", "Featured City: Lahore", "31 Premium Placements", "Multi-City Planning", "Installation & Support"].map((item) => (
+                <span key={item + copy} className="flex items-center whitespace-nowrap text-[11px] font-black uppercase tracking-[0.2em]">
+                  <span className="mx-6 h-1.5 w-1.5 rotate-45 bg-[#0d100b]" />
+                  {item}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ─── STRENGTHS BAR ───────────────────────────────────────── */}
-      <section className="relative z-10 -mt-10 px-5 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section className="relative z-10 bg-[#f7f4ec] px-5 py-12 lg:px-8">
+        <div className="mx-auto max-w-[92rem]">
           <ScrollReveal>
-            <div className="grid gap-3 rounded-[1.8rem] border border-black/7 bg-white p-3 shadow-[0_20px_60px_rgba(0,0,0,0.07)] md:grid-cols-2 lg:grid-cols-4">
-              {strengths.map(([title, copy]) => (
-                <article key={title} className="group rounded-[1.3rem] bg-[#f8f5ed] p-6 transition-colors duration-300 hover:bg-[#0d100b] hover:text-white">
-                  <div className="h-1.5 w-10 rounded-full bg-[#d4ea52] transition-[width] duration-300 group-hover:w-16" />
-                  <h2 className="mt-5 text-lg font-black">{title}</h2>
-                  <p className="mt-2.5 text-sm leading-[1.65] text-[#64705a] transition-colors group-hover:text-white/60">{copy}</p>
+            <div className="grid border-y border-black/10 md:grid-cols-2 lg:grid-cols-4">
+              {strengths.map(([title, copy], index) => (
+                <article key={title} className="group relative overflow-hidden border-black/10 px-2 py-8 md:px-7 lg:border-r lg:last:border-r-0">
+                  <span className="absolute right-4 top-3 text-6xl font-black leading-none text-black/[0.035] transition duration-500 group-hover:text-[#d4ea52]/35">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="h-1 w-8 bg-[#d4ea52] transition-[width] duration-300 group-hover:w-16" />
+                  <h2 className="mt-6 text-lg font-black">{title}</h2>
+                  <p className="mt-2.5 max-w-xs text-sm leading-[1.7] text-[#64705a]">{copy}</p>
                 </article>
               ))}
             </div>
@@ -367,20 +262,26 @@ export default function Home() {
       </section>
 
       {/* ─── ABOUT ───────────────────────────────────────────────── */}
-      <section id="about" className="mx-auto max-w-7xl px-5 py-32 lg:px-8">
-        <div className="grid gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+      <section id="about" className="relative overflow-hidden px-5 py-28 lg:px-8 lg:py-36">
+        <div aria-hidden="true" className="absolute -right-10 top-10 select-none text-[clamp(9rem,20vw,20rem)] font-black leading-none text-black/[0.025]">2006</div>
+        <div className="relative mx-auto grid max-w-7xl gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <ScrollReveal direction="left">
             <div className="relative">
-              <div className="relative aspect-3/4 overflow-hidden rounded-4xl bg-[#0d100b] shadow-[0_32px_72px_rgba(0,0,0,0.14)]">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[2.4rem] bg-[#0d100b] shadow-[0_32px_72px_rgba(0,0,0,0.14)]">
                 <Image
-                  src="/crown-assets/hero-billboard.jpg"
-                  alt="Crown Advertising billboard"
+                  src={landingLocations[23].image}
+                  alt="Askari 9 Cantt bridge-panel advertising placement"
                   fill
                   sizes="(min-width: 1024px) 42vw, 100vw"
                   className="object-cover transition duration-700 hover:scale-105"
                 />
+                <div className="absolute inset-0 bg-linear-to-t from-[#0d100b]/50 via-transparent to-transparent" />
+                <div className="absolute bottom-7 left-7 text-white">
+                  <p className="text-[9px] font-black uppercase tracking-[0.24em] text-[#d4ea52]">Built for moving audiences</p>
+                  <p className="mt-2 max-w-72 text-2xl font-black leading-[1.05]">Large-format impact at street level.</p>
+                </div>
               </div>
-              <div className="absolute -bottom-6 -right-4 max-w-64 rounded-3xl bg-[#0d100b] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.28)] sm:-right-8">
+              <div className="absolute -bottom-6 -right-4 max-w-64 rounded-3xl border border-white/8 bg-[#0d100b] p-6 shadow-[0_24px_48px_rgba(0,0,0,0.28)] sm:-right-8">
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#d4ea52]">NTN 2666456-9</p>
                 <p className="mt-3 text-xl font-black leading-tight text-white">Empowering brands since May 31st, 2006.</p>
               </div>
@@ -392,12 +293,14 @@ export default function Home() {
           </ScrollReveal>
 
           <ScrollReveal direction="right" delay={100}>
-            <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8a9720]">About Crown Advertising</p>
-            <h2 className="mt-5 text-[clamp(2rem,3.5vw,3.2rem)] font-black leading-[1.05]">
-              Complete advertising solutions under one roof.
+            <div className="flex items-center gap-4">
+              <span className="h-px w-12 bg-[#8a9720]" />
+              <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8a9720]">About Crown Advertising</p>
+            </div>
+            <h2 className="mt-6 text-[clamp(2.4rem,4vw,4rem)] font-black leading-[0.98] tracking-[-0.035em]">
+              Strategy, craft and media placement—under one roof.
             </h2>
-            <div className="mt-4 h-1 w-14 rounded-full bg-[#d4ea52]" />
-            <p className="mt-6 text-lg leading-[1.8] text-[#5a6152]">
+            <p className="mt-8 text-lg leading-[1.85] text-[#5a6152]">
               Crown Advertising is one of Pakistan&apos;s leading advertising companies, delivering top-tier indoor and outdoor media services designed to maximize brand visibility and growth.
             </p>
             <p className="mt-4 text-lg leading-[1.8] text-[#5a6152]">
@@ -420,36 +323,40 @@ export default function Home() {
       </section>
 
       {/* ─── SERVICES ────────────────────────────────────────────── */}
-      <section id="services" className="bg-[#0d100b] px-5 py-32 text-white lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section id="services" className="relative overflow-hidden bg-[#0d100b] px-5 py-32 text-white lg:px-8">
+        <div className="route-grid absolute inset-0 opacity-15" />
+        <div aria-hidden="true" className="absolute -right-10 top-10 select-none text-[18rem] font-black leading-none text-white/[0.025]">06</div>
+        <div className="relative mx-auto max-w-[92rem]">
           <ScrollReveal>
-            <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.26em] text-[#d4ea52]">Services</p>
-                <h2 className="mt-5 text-[clamp(2.2rem,4vw,3.8rem)] font-black leading-[1.04]">
-                  Media services that make brands visible.
+                <h2 className="mt-5 text-[clamp(2.7rem,5vw,5rem)] font-black leading-[0.94] tracking-[-0.04em]">
+                  Visibility is<br />a full-stack job.
                 </h2>
               </div>
               <p className="max-w-2xl text-lg leading-[1.8] text-white/58">
-                Strategy, production, placement, and support for campaigns that need to show up clearly across stores, roads, and city routes.
+                Strategy, production, placement, and support for campaigns that need to show up clearly across stores, roads, and major city routes.
               </p>
             </div>
           </ScrollReveal>
 
-          <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-16 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             {services.map((service, index) => (
-              <ScrollReveal key={service.title} delay={index * 65}>
-                <article className="group relative min-h-55 overflow-hidden rounded-3xl border border-white/8 bg-[#161a12] p-8 transition-colors duration-300 hover:bg-[#d4ea52]">
-                  <p className="text-xs font-black text-[#d4ea52] transition-colors duration-300 group-hover:text-[#6a7b10]">
+              <ScrollReveal key={service.title} delay={index * 65} className={index === 0 || index === 5 ? "lg:col-span-2" : ""}>
+                <article className="group relative min-h-64 overflow-hidden border border-white/10 bg-[#151912] p-8 transition-all duration-300 hover:border-[#d4ea52] hover:bg-[#d4ea52] lg:min-h-72">
+                  <p className="text-xs font-black tracking-[0.2em] text-[#d4ea52] transition-colors duration-300 group-hover:text-[#52600d]">
                     {String(index + 1).padStart(2, "0")}
                   </p>
-                  <div className="absolute right-6 top-6 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 group-hover:bg-[#0d100b]/12 group-hover:text-[#0d100b] text-white/0">
+                  <div className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-white/0 text-white/0 transition-all duration-300 group-hover:rotate-45 group-hover:border-[#0d100b]/20 group-hover:text-[#0d100b]">
                     <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none">
                       <path d="M3 13L13 3M13 3H6M13 3v7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
-                  <h3 className="mt-10 text-xl font-black leading-tight transition-colors duration-300 group-hover:text-[#0d100b]">{service.title}</h3>
-                  <p className="mt-3 text-sm leading-[1.7] text-white/52 transition-colors duration-300 group-hover:text-[#2a3013]">{service.copy}</p>
+                  <div className="absolute bottom-8 left-8 right-8">
+                    <h3 className={(index === 0 || index === 5 ? "text-3xl" : "text-xl") + " font-black leading-[1.02] transition-colors duration-300 group-hover:text-[#0d100b]"}>{service.title}</h3>
+                    <p className="mt-3 max-w-lg text-sm leading-[1.7] text-white/52 transition-colors duration-300 group-hover:text-[#2a3013]">{service.copy}</p>
+                  </div>
                 </article>
               </ScrollReveal>
             ))}
@@ -458,25 +365,35 @@ export default function Home() {
       </section>
 
       {/* ─── PROCESS ─────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-5 py-32 lg:px-8">
-        <ScrollReveal>
-          <div className="text-center">
-            <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8a9720]">How We Work</p>
-            <h2 className="mx-auto mt-5 max-w-2xl text-[clamp(2rem,3.5vw,3rem)] font-black leading-[1.1]">
-              From idea to installed campaign, the process stays practical.
-            </h2>
-          </div>
-        </ScrollReveal>
-        <div className="relative mt-16">
-          <div className="absolute left-[10%] right-[10%] top-8 hidden h-px bg-linear-to-r from-transparent via-black/10 to-transparent lg:block" />
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+      <section className="relative overflow-hidden bg-[#d4ea52] px-5 py-24 text-[#0d100b] lg:px-8 lg:py-32">
+        <div aria-hidden="true" className="absolute -bottom-28 -right-10 select-none text-[22rem] font-black leading-none text-[#0d100b]/[0.045]">05</div>
+        <div className="route-grid-dark absolute inset-0 opacity-20" />
+        <div className="relative mx-auto max-w-[92rem]">
+          <ScrollReveal>
+            <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.3em]">How we work</p>
+                <h2 className="mt-5 text-[clamp(2.7rem,5vw,5.4rem)] font-black leading-[0.9] tracking-[-0.045em]">
+                  One team.<br />Five clear moves.
+                </h2>
+              </div>
+              <p className="max-w-xl border-l border-[#0d100b]/20 pl-6 text-lg leading-[1.8] text-[#303817] lg:ml-auto">
+                From the first route recommendation to the final installation, every stage stays visible, practical, and focused on campaign impact.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="mt-16 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {workflowSteps.map((item, index) => (
-              <ScrollReveal key={item} delay={index * 80}>
-                <div className="flex flex-col items-center text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#d4ea52] text-xl font-black text-[#0d100b] shadow-[0_8px_24px_rgba(212,234,82,0.36)]">
-                    {index + 1}
+              <ScrollReveal key={item} delay={index * 70} className="h-full">
+                <div className={"group relative h-full min-h-52 overflow-hidden border border-[#0d100b] p-6 transition duration-300 hover:-translate-y-2 " + (index === 2 ? "bg-[#f7f4ec]" : "bg-[#0d100b] text-white")}>
+                  <span className={"text-6xl font-black leading-none " + (index === 2 ? "text-[#0d100b]/10" : "text-white/10")}>
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <span className={"mb-4 block h-1 w-9 transition-[width] duration-300 group-hover:w-16 " + (index === 2 ? "bg-[#0d100b]" : "bg-[#d4ea52]")} />
+                    <p className="text-lg font-black leading-tight">{item}</p>
                   </div>
-                  <p className="mt-5 text-base font-black leading-tight">{item}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -484,182 +401,154 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── WORK / PROJECTS ─────────────────────────────────────── */}
-      <section id="work" className="bg-[#f7f4ec] px-5 py-32 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-
-          {/* Section header */}
+      {/* ─── LOCATIONS ───────────────────────────────────────────── */}
+      <section id="locations" className="relative scroll-mt-20 overflow-hidden bg-[#ede8dc] px-5 py-24 lg:px-8 lg:py-32">
+        <div className="route-grid-dark absolute inset-0 opacity-[0.035]" />
+        <div className="relative mx-auto max-w-[92rem]">
           <ScrollReveal>
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8a9720]">Our Projects</p>
-                <h2 className="mt-4 text-[clamp(2.2rem,4vw,3.5rem)] font-black leading-[1.04]">
-                  Billboard work across<br className="hidden sm:block" /> cities &amp; toll plazas.
-                </h2>
-              </div>
-              {/* City jump-links */}
-              <div className="flex flex-wrap gap-2">
-                {projectGroups.map((group, i) => (
-                  <a
-                    key={group.id}
-                    href={`#${group.id}`}
-                    className="group flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black text-[#5a6152] transition-all duration-200 hover:border-[#d4ea52] hover:bg-[#d4ea52] hover:text-[#0d100b]"
-                  >
-                    <span className="text-[9px] font-black text-[#8a9720] group-hover:text-[#0d100b]">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    {group.name}
-                  </a>
-                ))}
+            <div className="relative overflow-hidden bg-[#0d100b] px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-14">
+              <div aria-hidden="true" className="absolute -right-5 -top-20 select-none text-[18rem] font-black leading-none text-white/[0.035]">31</div>
+              <div className="absolute bottom-0 right-[24%] top-0 hidden w-px rotate-[18deg] bg-[#d4ea52]/30 lg:block" />
+              <div className="relative grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+                <div>
+                  <div className="flex items-center gap-4">
+                    <span className="h-px w-12 bg-[#d4ea52]" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d4ea52]">Featured Inventory · Lahore</p>
+                  </div>
+                  <h2 className="mt-7 max-w-4xl text-[clamp(2.8rem,5.5vw,6rem)] font-black leading-[0.88] tracking-[-0.05em]">
+                    Prime routes.<br /><span className="text-[#d4ea52]">Serious visibility.</span>
+                  </h2>
+                </div>
+                <div className="lg:pb-2">
+                  <p className="max-w-xl text-base leading-[1.8] text-white/58">
+                    Crown operates across multiple cities. This 27 June 2026 release deliberately spotlights Lahore—one of Pakistan&apos;s largest and most important media markets—with 31 featured static billboards and bridge panels.
+                  </p>
+                  <div className="mt-7 flex flex-wrap gap-2">
+                    {landingLocationCategories.map((category) => (
+                      <a
+                        key={category.id}
+                        href={"#" + category.id}
+                        className="rounded-full border border-white/14 px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white transition hover:border-[#d4ea52] hover:bg-[#d4ea52] hover:text-[#0d100b]"
+                      >
+                        {category.shortLabel}
+                      </a>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </ScrollReveal>
 
-          {/* City groups */}
           <div className="mt-24 space-y-28">
-            {projectGroups.map((group, groupIndex) => (
-              <section id={group.id} key={group.id} className="scroll-mt-28">
+            {landingLocationCategories.map((category, categoryIndex) => {
+              const locations = landingLocations.filter((location) => location.category === category.id);
 
-                {/* City header row */}
-                <ScrollReveal>
-                  <div className="mb-10 grid grid-cols-[auto_1fr] items-start gap-6 lg:grid-cols-[auto_1fr_auto]">
-                    {/* Index number */}
-                    <span className="mt-1 text-[clamp(3rem,5vw,5rem)] font-black leading-none text-[#e8e3d8]">
-                      {String(groupIndex + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.22em] text-[#8a9720]">{group.kicker}</p>
-                      <h3 className="mt-1 text-[clamp(2rem,3.5vw,3.2rem)] font-black leading-tight">{group.name}</h3>
-                    </div>
-                    <p className="col-span-2 max-w-md text-sm leading-[1.8] text-[#6b7560] lg:col-span-1 lg:max-w-xs lg:pt-1 lg:text-right">
-                      {group.description}
-                    </p>
-                  </div>
-                  <div className="h-px w-full bg-black/[0.07]" />
-                </ScrollReveal>
-
-                {/* Image grid — first image is featured full-width, rest in 3-col */}
-                <div className="mt-8 space-y-3">
-                  {/* Feature image */}
-                  <ScrollReveal delay={0}>
-                    <article className="group relative overflow-hidden rounded-2xl bg-[#0d100b]" style={{ aspectRatio: "21/8" }}>
-                      <Image
-                        src={`/project-gallery/${group.images[0][0]}`}
-                        alt={`${group.name} — ${group.images[0][1]}`}
-                        fill
-                        sizes="(min-width: 1024px) 90vw, 100vw"
-                        className="object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-75"
-                      />
-                      <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-[#0d100b]/80 via-[#0d100b]/20 to-transparent p-6 lg:p-8">
-                        <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d4ea52]">{group.name}</p>
-                        <p className="mt-1 text-lg font-black text-white lg:text-xl">{group.images[0][1]}</p>
-                        <p className="mt-1 text-sm text-white/60">{group.images[0][2]}</p>
+              return (
+                <section id={category.id} key={category.id} className="scroll-mt-28">
+                  <ScrollReveal>
+                    <div className="mb-10 flex flex-col gap-5 border-b border-black/12 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                      <div className="flex items-start gap-5">
+                        <span className="text-6xl font-black leading-none text-[#0d100b]/10">
+                          {String(categoryIndex + 1).padStart(2, "0")}
+                        </span>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8a9720]">
+                            Lahore collection
+                          </p>
+                          <h3 className="mt-1 text-[clamp(2rem,3vw,3rem)] font-black leading-none tracking-[-0.03em]">
+                            {category.label}
+                          </h3>
+                        </div>
                       </div>
-                    </article>
-                  </ScrollReveal>
-
-                  {/* Supporting images */}
-                  {group.images.length > 1 && (
-                    <div className={`grid gap-3 ${group.images.slice(1).length === 1 ? "" : group.images.slice(1).length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
-                      {group.images.slice(1).map(([file, title, copy], idx) => (
-                        <ScrollReveal key={`${group.id}-${file}`} delay={(idx + 1) * 60}>
-                          <article className="group relative overflow-hidden rounded-2xl bg-[#0d100b]" style={{ aspectRatio: "4/3" }}>
-                            <Image
-                              src={`/project-gallery/${file}`}
-                              alt={`${group.name} — ${title}`}
-                              fill
-                              sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw"
-                              className="object-cover opacity-90 transition duration-500 group-hover:scale-105 group-hover:opacity-70"
-                            />
-                            <div className="absolute inset-x-0 bottom-0 translate-y-1 bg-linear-to-t from-[#0d100b]/85 via-[#0d100b]/25 to-transparent p-4 transition-transform duration-300 group-hover:translate-y-0">
-                              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-[#d4ea52]">{group.name}</p>
-                              <p className="mt-0.5 text-sm font-black leading-tight text-white">{title}</p>
-                              <p className="mt-1 max-h-0 overflow-hidden text-xs leading-[1.6] text-white/60 transition-[max-height] duration-500 group-hover:max-h-16">
-                                {copy}
-                              </p>
-                            </div>
-                          </article>
-                        </ScrollReveal>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-              </section>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* ─── PRESENCE / MAP ──────────────────────────────────────── */}
-      <section className="px-5 py-32 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <ScrollReveal>
-            <div className="overflow-hidden rounded-[2.4rem] border border-black/8 bg-white p-4 shadow-[0_24px_64px_rgba(0,0,0,0.07)]">
-              <div className="relative overflow-hidden rounded-[1.9rem] bg-[#f5f0e1]">
-                <div className="absolute -left-20 -top-10 h-72 w-72 rotate-12 rounded-[4rem] bg-[#d4ea52]/10" />
-                <div className="absolute -right-12 bottom-0 h-56 w-56 rotate-45 rounded-[3rem] bg-[#0d100b]/5" />
-                <div className="relative grid gap-8 p-8 lg:grid-cols-[0.45fr_0.55fr] lg:p-12">
-                  <div className="flex flex-col justify-between gap-8">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8a9720]">Our Presence</p>
-                      <h2 className="mt-5 text-[clamp(2rem,3.5vw,3rem)] font-black leading-[1.05]">
-                        Nationwide reach with support on the ground.
-                      </h2>
-                      <p className="mt-5 text-base leading-[1.8] text-[#5a6152]">
-                        Crown Advertising supports campaigns through offices, resources, logistics, and coverage across major Pakistani cities and routes.
+                      <p className="text-sm font-black uppercase tracking-[0.16em] text-[#8a9720]">
+                        {locations.length} placements
                       </p>
                     </div>
-                    <div className="grid gap-2.5 sm:grid-cols-2">
-                      {presenceStats.map((item) => (
-                        <div key={item} className="flex items-center gap-3 rounded-2xl border border-black/7 bg-white px-4 py-3">
-                          <span className="h-2 w-2 rounded-full bg-[#d4ea52]" />
-                          <span className="text-sm font-black text-[#1e2815]">{item}</span>
-                        </div>
-                      ))}
-                    </div>
+                  </ScrollReveal>
+
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {locations.map((location, index) => (
+                      <ScrollReveal key={location.id} delay={(index % 3) * 60} className={index % 7 === 0 ? "xl:col-span-2" : ""}>
+                        <article className="location-card group h-full overflow-hidden rounded-[1.7rem] border border-black/10 bg-[#f8f5ed] shadow-[0_14px_40px_rgba(13,16,11,0.05)] transition duration-500 hover:-translate-y-1.5 hover:border-black/20 hover:shadow-[0_24px_60px_rgba(13,16,11,0.12)]">
+                          <div className={"relative overflow-hidden bg-[#0d100b] " + (index % 7 === 0 ? "aspect-[16/8]" : "aspect-[16/10]")}>
+                            <Image
+                              src={location.image}
+                              alt={location.name + " outdoor advertising placement in Lahore"}
+                              fill
+                              sizes="(min-width: 1280px) 30vw, (min-width: 768px) 50vw, 100vw"
+                              className="object-cover transition duration-1000 group-hover:scale-[1.055]"
+                            />
+                            <div className="absolute inset-0 bg-linear-to-t from-[#0d100b]/75 via-transparent to-transparent" />
+                            <span className="absolute right-4 top-3 text-6xl font-black leading-none text-white/18">
+                              {String(location.slide).padStart(2, "0")}
+                            </span>
+                            <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
+                              <span className="rounded-full bg-[#d4ea52] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-[#0d100b]">
+                                Lahore
+                              </span>
+                              <span className="rounded-full border border-white/20 bg-[#0d100b]/72 px-3 py-1.5 text-xs font-black text-white backdrop-blur-md">
+                                {location.size}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col p-6 lg:p-7">
+                            <div className="flex items-center gap-3">
+                              <span className="h-px w-7 bg-[#8a9720]" />
+                              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8a9720]">
+                                Placement {String(location.slide).padStart(2, "0")}
+                              </p>
+                            </div>
+                            <h4 className={(index % 7 === 0 ? "text-2xl lg:text-3xl" : "text-xl") + " mt-3 font-black leading-[1.05] tracking-[-0.02em] text-[#0d100b]"}>
+                              {location.name}
+                            </h4>
+
+                            {location.toward ? (
+                              <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-t border-black/10 pt-5">
+                                <div>
+                                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#8a9720]">From</p>
+                                  <p className="mt-1 text-xs font-bold leading-snug text-[#30372b]">{location.from}</p>
+                                </div>
+                                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 text-[#8a9720]">
+                                  <path d="M5 12h14m-5-5 5 5-5 5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                                </svg>
+                                <div className="text-right">
+                                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#8a9720]">Toward</p>
+                                  <p className="mt-1 text-xs font-bold leading-snug text-[#30372b]">{location.toward}</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-6 border-t border-black/10 pt-5">
+                                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-[#8a9720]">Facing</p>
+                                <p className="mt-1 text-xs font-bold leading-snug text-[#30372b]">{location.from}</p>
+                              </div>
+                            )}
+
+                          </div>
+                        </article>
+                      </ScrollReveal>
+                    ))}
                   </div>
-                  <div className="grid gap-4 xl:grid-cols-[1fr_0.38fr]">
-                    <div className="relative min-h-110 overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#d4ea52_0%,#b5cd22_55%,#7f9418_100%)] shadow-inner">
-                      <div className="absolute -left-10 bottom-16 h-44 w-44 rotate-45 rounded-2xl bg-[#0d100b]/9" />
-                      <div className="absolute -right-10 top-0 h-44 w-44 rotate-45 rounded-2xl bg-white/20" />
-                      <svg aria-label="Pakistan availability map" viewBox="0 0 420 520" className="absolute inset-0 h-full w-full">
-                        <path d={pakistanMapPath} fill="rgba(255,255,255,0.12)" stroke="#182011" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" vectorEffect="non-scaling-stroke" />
-                        {mapPins.map((pin, index) => (
-                          <g key={pin.city}>
-                            <circle cx={pin.x} cy={pin.y} r="13" fill="#0d100b" stroke="rgba(255,255,255,0.85)" strokeWidth="5" />
-                            <text x={pin.x} y={pin.y + 4} fill="#ffffff" fontSize="10" fontWeight="900" textAnchor="middle">{index + 1}</text>
-                          </g>
-                        ))}
-                      </svg>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-1">
-                      {mapPins.map((pin, index) => (
-                        <div key={pin.city} className="flex items-center gap-2.5 rounded-2xl border border-black/7 bg-white px-3 py-2.5">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0d100b] text-[11px] font-black text-white">{index + 1}</span>
-                          <span className="text-sm font-black text-[#1e2815]">{pin.city}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
+                </section>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* ─── CLIENTS ─────────────────────────────────────────────── */}
-      <section className="bg-[#0d100b] py-28 text-white">
+      <section className="relative overflow-hidden bg-[#0d100b] py-28 text-white">
+        <div className="route-grid absolute inset-0 opacity-10" />
         <ScrollReveal>
-          <div className="mx-auto max-w-7xl px-5 text-center lg:px-8">
-            <p className="text-xs font-black uppercase tracking-[0.26em] text-[#8a9720]">Our Clients</p>
-            <h2 className="mx-auto mt-5 max-w-3xl text-[clamp(2.2rem,4vw,3.5rem)] font-black leading-[1.05]">
-              Brands across Pakistan trust Crown Advertising for visibility.
-            </h2>
-            <p className="mx-auto mt-5 max-w-xl text-base leading-[1.8] text-white/55">
-              From real estate and retail to food, FMCG, and services, our work supports brands that need to be seen in the right places.
+          <div className="relative mx-auto grid max-w-[92rem] gap-8 px-5 lg:grid-cols-[1fr_0.65fr] lg:items-end lg:px-8">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.3em] text-[#d4ea52]">Our Clients</p>
+              <h2 className="mt-5 max-w-4xl text-[clamp(2.6rem,5vw,5rem)] font-black leading-[0.92] tracking-[-0.045em]">
+                Built with brands<br />that need to be seen.
+              </h2>
+            </div>
+            <p className="max-w-xl border-l border-white/12 pl-6 text-base leading-[1.8] text-white/55 lg:ml-auto">
+              From real estate and retail to food, FMCG, and services, our work supports brands that need attention in the right places.
             </p>
           </div>
         </ScrollReveal>
@@ -686,19 +575,19 @@ export default function Home() {
       </section>
 
       {/* ─── CEO QUOTE ───────────────────────────────────────────── */}
-      <section className="bg-[#0d100b] px-5 pb-32 pt-12 text-white lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section className="bg-[#0d100b] px-5 pb-32 pt-10 text-white lg:px-8">
+        <div className="mx-auto max-w-[92rem]">
           <ScrollReveal>
-            <div className="grid gap-10 rounded-4xl border border-white/7 bg-white/4 p-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-12">
+            <div className="relative grid gap-10 overflow-hidden border-y border-white/10 py-14 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:py-20">
+              <span aria-hidden="true" className="absolute -right-2 -top-16 text-[18rem] font-black leading-none text-[#d4ea52]/[0.055]">“</span>
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.26em] text-[#d4ea52]">CEO Message</p>
-                <h2 className="mt-5 text-[clamp(2rem,3vw,2.8rem)] font-black leading-[1.08]">
+                <h2 className="mt-5 max-w-md text-[clamp(2.4rem,4vw,4rem)] font-black leading-[0.98] tracking-[-0.035em]">
                   We&apos;re passionate about making your brand shine.
                 </h2>
               </div>
-              <figure>
-                <div className="mb-3 text-[5rem] font-black leading-none text-[#d4ea52]/80">&ldquo;</div>
-                <blockquote className="text-lg leading-[1.9] text-white/70">
+              <figure className="relative z-10">
+                <blockquote className="text-lg leading-[1.9] text-white/68 lg:text-xl">
                   At Crown Advertising, our vision is to make your brand shine brightly in the crowded marketplace. We are passionate about crafting unique and memorable advertising campaigns that capture the essence of your brand and connect with your audience on a deeper level.
                 </blockquote>
                 <figcaption className="mt-8 border-t border-white/8 pt-6">
@@ -712,11 +601,14 @@ export default function Home() {
       </section>
 
       {/* ─── CTA BANNER ──────────────────────────────────────────── */}
-      <section className="bg-[#d4ea52] px-5 py-24 lg:px-8">
+      <section className="relative overflow-hidden bg-[#d4ea52] px-5 py-24 lg:px-8 lg:py-32">
+        <div aria-hidden="true" className="absolute -bottom-36 -left-16 h-96 w-96 rounded-full border-[80px] border-[#0d100b]/5" />
+        <div aria-hidden="true" className="absolute -right-20 top-0 text-[18rem] font-black leading-none text-[#0d100b]/[0.045]">GO</div>
         <ScrollReveal>
-          <div className="mx-auto max-w-4xl text-center">
-            <h2 className="text-[clamp(2.4rem,5vw,4rem)] font-black leading-[1.04] text-[#0d100b]">
-              Ready to make your brand impossible to miss?
+          <div className="relative mx-auto max-w-5xl text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.32em] text-[#52600d]">Your next campaign starts here</p>
+            <h2 className="mt-6 text-[clamp(3rem,6.5vw,6.5rem)] font-black leading-[0.88] tracking-[-0.055em] text-[#0d100b]">
+              Make every city<br />remember your name.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-lg leading-[1.8] text-[#2a3013]">
               Let&apos;s build a campaign that gets your brand in front of the right audience across Pakistan&apos;s busiest routes and retail locations.
@@ -757,7 +649,7 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <h2 className="text-sm font-black uppercase tracking-[0.2em]">Our Office</h2>
+              <h2 className="text-sm font-black uppercase tracking-[0.2em]">Lahore Office</h2>
               <div className="mt-3 h-0.5 w-8 rounded-full bg-[#d4ea52]" />
               <p className="mt-5 leading-[1.8] text-[#5a6152]">{contact.address}</p>
               <a href={`tel:${contact.phone}`} className="mt-5 block text-2xl font-black transition hover:text-[#8a9720]">{contact.phone}</a>
@@ -784,7 +676,7 @@ export default function Home() {
           </div>
           <div className="mt-6 flex flex-col items-center justify-between gap-3 px-2 text-sm text-[#8a9720] sm:flex-row">
             <p>© {new Date().getFullYear()} Crown Advertising. All rights reserved.</p>
-            <p>Lahore, Pakistan</p>
+            <p>Based in Lahore · Campaigns across Pakistan</p>
           </div>
         </div>
       </footer>

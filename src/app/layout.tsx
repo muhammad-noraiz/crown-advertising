@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Syne, Inter } from "next/font/google";
+import "@daypicker/react/style.css";
 import "./globals.css";
 
 const inter = Inter({

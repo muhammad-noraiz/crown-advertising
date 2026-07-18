@@ -34,6 +34,7 @@ function BookingModalContent({
   const [customDuration, setCustomDuration] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState("");
   const [clientName, setClientName] = useState("");
+  const [billingType, setBillingType] = useState<"monthly" | "end_of_term">("monthly");
 
   function handleClientChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value;
@@ -46,12 +47,6 @@ function BookingModalContent({
   }
 
   useEffect(() => {
-    if (startDate && !customDuration) {
-      setEndDate(addDuration(startDate, duration));
-    }
-  }, [startDate, duration, customDuration]);
-
-  useEffect(() => {
     if (state === "ok") {
       onClose();
       router.refresh();
@@ -61,7 +56,7 @@ function BookingModalContent({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold text-slate-900">Add Booking</h2>
@@ -156,7 +151,11 @@ function BookingModalContent({
                   type="date"
                   required
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setStartDate(value);
+                    if (value && !customDuration) setEndDate(addDuration(value, duration));
+                  }}
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
@@ -173,6 +172,7 @@ function BookingModalContent({
                     } else {
                       setCustomDuration(false);
                       setDuration(e.target.value);
+                      if (startDate) setEndDate(addDuration(startDate, e.target.value));
                     }
                   }}
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
@@ -209,53 +209,75 @@ function BookingModalContent({
               </div>
             </div>
 
-            {/* Invoice fields */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Locking Ref.</label>
-                <input
-                  name="lockingRef"
-                  placeholder="e.g. AdMaxx Hoarding Group"
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Invoice No.</label>
-                <input
-                  name="invoiceNo"
-                  placeholder="Invoice number"
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Invoice Status</label>
-                <select
-                  name="invoiceStatus"
-                  defaultValue="PENDING"
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
-                >
-                  <option value="PENDING">Pending</option>
-                  <option value="PAID">Paid</option>
-                  <option value="OVERDUE">Overdue</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Locking Ref.</label>
+              <input
+                name="lockingRef"
+                placeholder="e.g. AdMaxx Hoarding Group"
+                className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
             </div>
 
-            {/* Amount */}
+            {/* Billing plan */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-slate-900">Payment plan</p>
+                <p className="mt-0.5 text-xs text-slate-500">Choose how this client pays for the booking.</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { value: "monthly", title: "Monthly rent", copy: "Create one invoice for every booking month." },
+                  { value: "end_of_term", title: "Combined at end", copy: "Create one invoice for the full contract amount." },
+                ].map((option) => (
+                  <label
+                    key={option.value}
+                    className={`cursor-pointer rounded-xl border p-4 transition ${billingType === option.value ? "border-amber-500 bg-amber-50 shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"}`}
+                  >
+                    <input
+                      type="radio"
+                      name="billingType"
+                      value={option.value}
+                      checked={billingType === option.value}
+                      onChange={() => setBillingType(option.value as "monthly" | "end_of_term")}
+                      className="sr-only"
+                    />
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold text-slate-900">{option.title}</span>
+                      <span className={`h-3 w-3 rounded-full ring-2 ring-offset-2 ${billingType === option.value ? "bg-amber-500 ring-amber-500" : "bg-white ring-slate-300"}`} />
+                    </span>
+                    <span className="mt-1.5 block text-xs leading-5 text-slate-500">{option.copy}</span>
+                  </label>
+                ))}
+              </div>
+
+              <label className="mt-3 flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3.5 transition hover:border-amber-300 hover:bg-amber-50/40">
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-slate-900">Create invoice schedule now</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-slate-500">
+                    {billingType === "monthly" ? "Generate the monthly invoices when this booking is saved." : "Generate the final combined invoice when this booking is saved."}
+                  </span>
+                </span>
+                <input name="generateInvoices" type="checkbox" defaultChecked className="peer sr-only" />
+                <span className="relative h-6 w-11 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-amber-500 peer-focus-visible:ring-2 peer-focus-visible:ring-amber-500 peer-focus-visible:ring-offset-2 after:absolute after:left-1 after:top-1 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5" />
+              </label>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Contract Amount (PKR) <span className="text-red-500">*</span>
+                Total Contract Amount (PKR) <span className="text-red-500">*</span>
               </label>
               <input
                 name="amount"
                 type="number"
-                min="0"
-                step="1"
+                min="1"
+                step="0.01"
                 required
                 placeholder="e.g. 150000"
                 className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
+              <p className="mt-1.5 text-xs text-slate-500">
+                {billingType === "monthly" ? "The total will be divided evenly across the monthly invoices." : "The full amount will be due on the booking end date."}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Remarks</label>

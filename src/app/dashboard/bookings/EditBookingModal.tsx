@@ -45,12 +45,6 @@ function EditBookingModalContent({
   }
 
   useEffect(() => {
-    if (startDate && !customDuration) {
-      setEndDate(addDuration(startDate, duration));
-    }
-  }, [startDate, duration, customDuration]);
-
-  useEffect(() => {
     if (state === "ok") {
       onClose();
       router.refresh();
@@ -60,7 +54,7 @@ function EditBookingModalContent({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/60" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold text-slate-900">Edit Booking</h2>
@@ -142,7 +136,11 @@ function EditBookingModalContent({
                   type="date"
                   required
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setStartDate(value);
+                    if (value && !customDuration) setEndDate(addDuration(value, duration));
+                  }}
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
@@ -159,6 +157,7 @@ function EditBookingModalContent({
                     } else {
                       setCustomDuration(false);
                       setDuration(e.target.value);
+                      if (startDate) setEndDate(addDuration(startDate, e.target.value));
                     }
                   }}
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
@@ -195,8 +194,7 @@ function EditBookingModalContent({
               </div>
             </div>
 
-            {/* Invoice fields */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Locking Ref.</label>
                 <input
@@ -206,38 +204,29 @@ function EditBookingModalContent({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Invoice No.</label>
-                <input
-                  name="invoiceNo"
-                  defaultValue={booking.invoice_no ?? ""}
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Invoice Status</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Payment Plan</label>
                 <select
-                  name="invoiceStatus"
-                  defaultValue={booking.invoice_status}
+                  name="billingType"
+                  defaultValue={booking.billing_type ?? "end_of_term"}
                   className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
                 >
-                  <option value="PENDING">Pending</option>
-                  <option value="PAID">Paid</option>
-                  <option value="OVERDUE">Overdue</option>
-                  <option value="CANCELLED">Cancelled</option>
+                  <option value="monthly">Monthly rent</option>
+                  <option value="end_of_term">Combined amount at end</option>
                 </select>
+                <p className="mt-1.5 text-xs text-slate-500">Changing this setting does not alter invoices already recorded.</p>
               </div>
             </div>
 
             {/* Amount */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Contract Amount (PKR) <span className="text-red-500">*</span>
+                Total Contract Amount (PKR) <span className="text-red-500">*</span>
               </label>
               <input
                 name="amount"
                 type="number"
-                min="0"
-                step="1"
+                min="1"
+                step="0.01"
                 required
                 defaultValue={booking.amount ?? 0}
                 className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"

@@ -3,7 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { InvoiceStatus } from "@/lib/supabase/types";
+import { buildInvoiceSchedule } from "@/lib/invoices";
+import type { BillingType, Booking, InvoiceStatus } from "@/lib/supabase/types";
 
 export async function createBooking(
   _prevState: string | null,
@@ -16,8 +17,7 @@ export async function createBooking(
   const sale_person = (formData.get("salePerson") as string)?.trim() || null;
   const vendor = (formData.get("vendor") as string)?.trim() || null;
   const locking_ref = (formData.get("lockingRef") as string)?.trim() || null;
-  const invoice_no = (formData.get("invoiceNo") as string)?.trim() || null;
-  const invoice_status = (formData.get("invoiceStatus") as InvoiceStatus) || "PENDING";
+  const billing_type = (formData.get("billingType") as BillingType) || "end_of_term";
   const start_date = formData.get("startDate") as string;
   const end_date = formData.get("endDate") as string;
   const duration = (formData.get("duration") as string)?.trim();
@@ -26,13 +26,14 @@ export async function createBooking(
   if (!location_id || !client_name || !start_date || !end_date || !duration) {
     return "Location, client name, dates, and duration are required.";
   }
+  if (amount <= 0) return "Contract amount must be greater than zero.";
 
   if (new Date(end_date) <= new Date(start_date)) {
     return "End date must be after start date.";
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("bookings").insert({
+  const { data: bookingData, error } = await supabase.from("bookings").insert({
     location_id,
     client_id,
     client_name,
@@ -40,15 +41,25 @@ export async function createBooking(
     sale_person,
     vendor,
     locking_ref,
-    invoice_no,
-    invoice_status,
+    invoice_no: null,
+    invoice_status: "PENDING" as InvoiceStatus,
+    billing_type,
     start_date: new Date(start_date).toISOString(),
     end_date: new Date(end_date).toISOString(),
     duration,
     remarks,
-  });
+  }).select("id, amount, billing_type, start_date, end_date").single();
 
   if (error) return error.message;
+
+  if (formData.get("generateInvoices") === "on") {
+    const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">);
+    const { error: invoiceError } = await supabase.from("booking_invoices").insert(invoices);
+    if (invoiceError) {
+      await supabase.from("bookings").delete().eq("id", bookingData.id);
+      return invoiceError.message;
+    }
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/bookings");
@@ -68,8 +79,7 @@ export async function updateBooking(
   const sale_person = (formData.get("salePerson") as string)?.trim() || null;
   const vendor = (formData.get("vendor") as string)?.trim() || null;
   const locking_ref = (formData.get("lockingRef") as string)?.trim() || null;
-  const invoice_no = (formData.get("invoiceNo") as string)?.trim() || null;
-  const invoice_status = (formData.get("invoiceStatus") as InvoiceStatus) || "PENDING";
+  const billing_type = (formData.get("billingType") as BillingType) || "end_of_term";
   const start_date = formData.get("startDate") as string;
   const end_date = formData.get("endDate") as string;
   const duration = (formData.get("duration") as string)?.trim();
@@ -78,6 +88,7 @@ export async function updateBooking(
   if (!client_name || !start_date || !end_date || !duration) {
     return "Client name, dates, and duration are required.";
   }
+  if (amount <= 0) return "Contract amount must be greater than zero.";
 
   if (new Date(end_date) <= new Date(start_date)) {
     return "End date must be after start date.";
@@ -93,8 +104,7 @@ export async function updateBooking(
       sale_person,
       vendor,
       locking_ref,
-      invoice_no,
-      invoice_status,
+      billing_type,
       start_date: new Date(start_date).toISOString(),
       end_date: new Date(end_date).toISOString(),
       duration,
@@ -131,8 +141,7 @@ export async function createBookingAction(
   const sale_person = (formData.get("salePerson") as string)?.trim() || null;
   const vendor = (formData.get("vendor") as string)?.trim() || null;
   const locking_ref = (formData.get("lockingRef") as string)?.trim() || null;
-  const invoice_no = (formData.get("invoiceNo") as string)?.trim() || null;
-  const invoice_status = (formData.get("invoiceStatus") as InvoiceStatus) || "PENDING";
+  const billing_type = (formData.get("billingType") as BillingType) || "end_of_term";
   const start_date = formData.get("startDate") as string;
   const end_date = formData.get("endDate") as string;
   const duration = (formData.get("duration") as string)?.trim();
@@ -141,12 +150,13 @@ export async function createBookingAction(
   if (!location_id || !client_name || !start_date || !end_date || !duration) {
     return "Location, client name, dates, and duration are required.";
   }
+  if (amount <= 0) return "Contract amount must be greater than zero.";
   if (new Date(end_date) <= new Date(start_date)) {
     return "End date must be after start date.";
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("bookings").insert({
+  const { data: bookingData, error } = await supabase.from("bookings").insert({
     location_id,
     client_id,
     client_name,
@@ -154,19 +164,28 @@ export async function createBookingAction(
     sale_person,
     vendor,
     locking_ref,
-    invoice_no,
-    invoice_status,
+    invoice_no: null,
+    invoice_status: "PENDING" as InvoiceStatus,
+    billing_type,
     start_date: new Date(start_date).toISOString(),
     end_date: new Date(end_date).toISOString(),
     duration,
     remarks,
-  });
+  }).select("id, amount, billing_type, start_date, end_date").single();
 
   if (error) return error.message;
+
+  if (formData.get("generateInvoices") === "on") {
+    const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">);
+    const { error: invoiceError } = await supabase.from("booking_invoices").insert(invoices);
+    if (invoiceError) {
+      await supabase.from("bookings").delete().eq("id", bookingData.id);
+      return invoiceError.message;
+    }
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/bookings");
   revalidatePath(`/dashboard/locations/${location_id}`);
   return "ok";
 }
-

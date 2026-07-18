@@ -1,4 +1,5 @@
-export type InvoiceStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+export type InvoiceStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+export type BillingType = 'monthly' | 'end_of_term';
 export type LandType = 'private' | 'government' | 'crown';
 export type PricingBasis = 'monthly' | 'slot' | 'on_request';
 export type LocationMediaCategory = 'static' | 'motorway' | 'digital' | 'bridge-panel' | 'toll-plaza';
@@ -60,12 +61,40 @@ export interface Booking {
   locking_ref: string | null;
   invoice_no: string | null;
   invoice_status: InvoiceStatus;
+  billing_type: BillingType;
   start_date: string;
   end_date: string;
   duration: string;
   remarks: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface BookingInvoice {
+  id: number;
+  booking_id: number;
+  invoice_no: string;
+  period_start: string | null;
+  period_end: string | null;
+  due_date: string;
+  amount: number;
+  paid_amount: number;
+  status: InvoiceStatus;
+  last_payment_date: string | null;
+  payment_reference: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoicePayment {
+  id: number;
+  invoice_id: number;
+  amount: number;
+  payment_date: string;
+  payment_reference: string | null;
+  notes: string | null;
+  created_at: string;
 }
 
 export interface Client {
@@ -105,11 +134,12 @@ export interface LocationPartner {
 }
 
 export interface LocationWithBookings extends Location {
-  bookings: Booking[];
+  bookings: (Booking & { booking_invoices?: BookingInvoice[] })[];
 }
 
 export interface BookingWithLocation extends Booking {
   locations: Pick<Location, 'id' | 'name' | 'size' | 'city'> | null;
+  booking_invoices?: BookingInvoice[];
 }
 
 export interface LocationImage {
@@ -142,6 +172,18 @@ export interface Database {
         Update: Partial<Omit<Booking, 'id' | 'created_at' | 'updated_at'>>;
         Relationships: [];
       };
+      booking_invoices: {
+        Row: BookingInvoice;
+        Insert: Omit<BookingInvoice, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<BookingInvoice, 'id' | 'booking_id' | 'created_at' | 'updated_at'>>;
+        Relationships: [];
+      };
+      invoice_payments: {
+        Row: InvoicePayment;
+        Insert: Omit<InvoicePayment, 'id' | 'created_at'>;
+        Update: Partial<Omit<InvoicePayment, 'id' | 'invoice_id' | 'created_at'>>;
+        Relationships: [];
+      };
       clients: {
         Row: Client;
         Insert: Omit<Client, 'id' | 'created_at' | 'updated_at'>;
@@ -170,6 +212,7 @@ export interface Database {
     Views: Record<string, never>;
     Enums: {
       invoice_status: InvoiceStatus;
+      billing_type: BillingType;
       land_type: LandType;
       expense_type: ExpenseType;
     };

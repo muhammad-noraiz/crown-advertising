@@ -14,12 +14,16 @@ import type { LocationWithBookings, Booking, LocationExpense, LocationPartner, L
 import { AddBookingModal } from "@/app/dashboard/bookings/AddBookingModal";
 import { EditLocationModal } from "@/app/dashboard/locations/EditLocationModal";
 import { EditBookingModal } from "@/app/dashboard/bookings/EditBookingModal";
+import { InvoiceManagerModal } from "@/app/dashboard/bookings/InvoiceManagerModal";
 import { LocationImagesTab } from "./LocationImagesTab";
 import { locationCategoryLabels } from "@/lib/location-showcase-types";
+import { getBookingInvoiceStatus, getInvoiceTotals } from "@/lib/invoices";
 
 const invoiceStatusLabel: Record<string, { label: string; cls: string }> = {
-  PENDING: { label: "Pending", cls: "bg-yellow-100 text-yellow-700" },
-  PAID: { label: "Paid", cls: "bg-green-100 text-green-700" },
+  NOT_SETUP: { label: "Not set up", cls: "bg-slate-100 text-slate-600" },
+  PENDING: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
+  PARTIAL: { label: "Part paid", cls: "bg-blue-100 text-blue-700" },
+  PAID: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
   OVERDUE: { label: "Overdue", cls: "bg-red-100 text-red-700" },
   CANCELLED: { label: "Cancelled", cls: "bg-slate-100 text-slate-500" },
 };
@@ -70,7 +74,7 @@ export default async function LocationDetailPage({
   const supabase = await createClient();
   const [{ data: location }, { data: allLocations }, { data: expensesData }, { data: partnersData }, { data: clientsData }, { data: imagesData }] =
     await Promise.all([
-      supabase.from("locations").select("*, bookings(*)").eq("id", Number(id)).single(),
+      supabase.from("locations").select("*, bookings(*, booking_invoices(*))").eq("id", Number(id)).single(),
       supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
       supabase.from("location_expenses").select("*").eq("location_id", Number(id)).order("expense_date", { ascending: false }),
       supabase.from("location_partners").select("*").eq("location_id", Number(id)).order("partner_name"),
@@ -176,7 +180,7 @@ export default async function LocationDetailPage({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50">
-                  {["Starting Date", "Duration", "Ending Date", "Display (Client)", "Amount (PKR)", "Sale", "Vendor", "Locking Ref.", "Invoice No.", "Invoice", "Status", "Remarks", ""].map((h) => (
+                  {["Starting Date", "Duration", "Ending Date", "Display (Client)", "Amount (PKR)", "Sale", "Vendor", "Locking Ref.", "Payment", "Status", "Remarks", ""].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -184,7 +188,7 @@ export default async function LocationDetailPage({
               <tbody className="divide-y divide-slate-50">
                 {loc.bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={13} className="px-6 py-8 text-center text-slate-400">
+                    <td colSpan={12} className="px-6 py-8 text-center text-slate-400">
                       No bookings yet. <AddBookingModal locations={locations} clients={clients} defaultLocationId={loc.id} />
                     </td>
                   </tr>
@@ -195,7 +199,10 @@ export default async function LocationDetailPage({
                     .map((b) => {
                       const bs = bookingStatus(b.end_date);
                       const bsl = bookingStatusLabel[bs];
-                      const isl = invoiceStatusLabel[b.invoice_status] ?? invoiceStatusLabel.PENDING;
+                      const invoices = b.booking_invoices ?? [];
+                      const invoiceState = getBookingInvoiceStatus(invoices);
+                      const invoiceTotals = getInvoiceTotals(invoices);
+                      const isl = invoiceStatusLabel[invoiceState] ?? invoiceStatusLabel.PENDING;
                       return (
                         <tr key={b.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3 whitespace-nowrap text-slate-600">{formatDate(b.start_date)}</td>
@@ -206,9 +213,9 @@ export default async function LocationDetailPage({
                           <td className="px-4 py-3 text-slate-500">{b.sale_person ?? "—"}</td>
                           <td className="px-4 py-3 text-slate-500">{b.vendor ?? "—"}</td>
                           <td className="px-4 py-3 text-slate-500 text-xs">{b.locking_ref ?? "—"}</td>
-                          <td className="px-4 py-3 text-slate-500 text-xs">{b.invoice_no ?? "—"}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isl.cls}`}>{isl.label}</span>
+                            <p className="mt-1 text-[10px] text-slate-400">PKR {Math.round(invoiceTotals.outstanding).toLocaleString()} due</p>
                           </td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${bsl.cls}`}>{bsl.label}</span>
@@ -216,6 +223,7 @@ export default async function LocationDetailPage({
                           <td className="px-4 py-3 text-slate-400 text-xs max-w-32 truncate">{b.remarks ?? "—"}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
+                              <InvoiceManagerModal booking={b as Booking} invoices={invoices} locationName={loc.name} />
                               <EditBookingModal booking={b as Booking} location={loc} clients={clients} />
                               <DeleteBookingButton id={b.id} locationId={loc.id} />
                             </div>

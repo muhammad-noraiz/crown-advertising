@@ -35,6 +35,119 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ── Accounts date-range picker ─────────────────────────────────── */
+
+.accounts-date-picker .rdp-root {
+  --rdp-accent-color: #d97706;
+  --rdp-accent-background-color: #fff7ed;
+  --rdp-day-height: 38px;
+  --rdp-day-width: 38px;
+  --rdp-day_button-height: 36px;
+  --rdp-day_button-width: 36px;
+  --rdp-months-gap: 1.25rem;
+  --rdp-range_middle-background-color: #fef3c7;
+  --rdp-range_middle-color: #78350f;
+  --rdp-range_start-date-background-color: #d97706;
+  --rdp-range_end-date-background-color: #d97706;
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.accounts-date-picker .rdp-month_caption {
+  align-items: center;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.accounts-date-picker .rdp-weekday {
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.accounts-date-picker .rdp-day_button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.accounts-date-picker .rdp-range_start .rdp-day_button,
+.accounts-date-picker .rdp-range_end .rdp-day_button {
+  background: #d97706;
+  color: white;
+}
+
+@media (max-width: 760px) {
+  .accounts-date-picker {
+    max-width: calc(100vw - 3rem);
+  }
+}
+
+/* ── Crown landing page: urban editorial system ─────────────────── */
+
+.landing-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.landing-shell::before {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  content: "";
+  opacity: 0.026;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.hero-stage {
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 0.08);
+}
+
+.hero-wordmark {
+  -webkit-text-stroke: 1px rgb(255 255 255 / 0.025);
+}
+
+.route-grid {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.09) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to right, transparent, black 28%, black 72%, transparent);
+}
+
+.route-grid-dark {
+  background-image:
+    linear-gradient(rgb(13 16 11 / 0.24) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(13 16 11 / 0.24) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.campaign-ticker {
+  animation: campaign-ticker 34s linear infinite;
+}
+
+.campaign-ticker:hover {
+  animation-play-state: paused;
+}
+
+.location-card {
+  transform-origin: center bottom;
+}
+
+.location-card:hover {
+  transform: translateY(-6px) rotate(-0.25deg);
+}
+
+@keyframes campaign-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 /* ── Scroll animations ───────────────────────────────────────────── */
 
 .animate-rise {
@@ -123,8 +236,13 @@ html {
   .animate-rise,
   .animate-float,
   .animate-marquee,
-  .animate-marquee-reverse {
+  .animate-marquee-reverse,
+  .campaign-ticker {
     animation: none;
+  }
+
+  .location-card:hover {
+    transform: none;
   }
 
   .transition-opacity,
@@ -318,5 +436,3 @@ html.dark .fixed label { color: rgb(203 213 225) !important; }
 
 /* Toggle label text inside modals */
 html.dark .fixed span.text-sm { color: rgb(203 213 225) !important; }
-
-
