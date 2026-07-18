@@ -3,12 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { ExpenseType } from "@/lib/supabase/types";
+import { requirePermission } from "@/lib/auth/access";
 
 export async function createExpense(
   locationId: number,
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const expense_type = (formData.get("expenseType") as ExpenseType);
   const amount = parseFloat(formData.get("amount") as string);
   const expense_date = formData.get("expenseDate") as string;
@@ -43,6 +45,7 @@ export async function updateExpense(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const expense_type = (formData.get("expenseType") as ExpenseType);
   const amount = parseFloat(formData.get("amount") as string);
   const expense_date = formData.get("expenseDate") as string;
@@ -68,6 +71,7 @@ export async function updateExpense(
 }
 
 export async function deleteExpense(id: number, locationId: number) {
+  await requirePermission("locations");
   const supabase = await createClient();
   await supabase.from("location_expenses").delete().eq("id", id);
   revalidatePath(`/dashboard/locations/${locationId}`);

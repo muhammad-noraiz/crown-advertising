@@ -74,12 +74,12 @@ function ClientModalContent({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function AddClientModal() {
+export function AddClientModal({ buttonClassName, buttonLabel = "+ Add Client" }: { buttonClassName?: string; buttonLabel?: string } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
-      <button onClick={() => setIsOpen(true)} className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg text-sm transition-colors">
-        + Add Client
+      <button onClick={() => setIsOpen(true)} className={buttonClassName ?? "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg text-sm transition-colors"}>
+        {buttonLabel}
       </button>
       {isOpen && <ClientModalContent onClose={() => setIsOpen(false)} />}
     </>

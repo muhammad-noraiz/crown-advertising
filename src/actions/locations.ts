@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { LandType, LocationMediaCategory, PricingBasis } from "@/lib/supabase/types";
+import { requirePermission } from "@/lib/auth/access";
 
 function parseLocationForm(formData: FormData) {
   const name = (formData.get("name") as string)?.trim();
@@ -40,6 +41,7 @@ export async function createLocation(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const payload = parseLocationForm(formData);
   const { name, size, city } = payload;
 
@@ -61,6 +63,7 @@ export async function updateLocation(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const payload = parseLocationForm(formData);
   const { name, size, city } = payload;
 
@@ -81,6 +84,7 @@ export async function updateLocation(
 }
 
 export async function deleteLocation(id: number) {
+  await requirePermission("locations");
   const supabase = await createClient();
   await supabase.from("locations").delete().eq("id", id);
   revalidatePath("/dashboard/locations");
@@ -92,6 +96,7 @@ export async function createLocationAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const payload = parseLocationForm(formData);
   const { name, size, city } = payload;
 

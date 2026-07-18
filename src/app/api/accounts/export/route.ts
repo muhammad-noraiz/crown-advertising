@@ -1,11 +1,12 @@
 import { getAccountReport } from "@/lib/account-report";
 import { buildAccountsWorkbook } from "@/lib/accounts-export";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentAccess } from "@/lib/auth/access";
+import { canAccess } from "@/lib/permissions";
 
 export async function GET(request: Request) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return new Response("Unauthorized", { status: 401 });
+  const access = await getCurrentAccess();
+  if (!access) return new Response("Unauthorized", { status: 401 });
+  if (!canAccess(access, "accounts")) return new Response("Forbidden", { status: 403 });
 
   const url = new URL(request.url);
   const report = await getAccountReport({

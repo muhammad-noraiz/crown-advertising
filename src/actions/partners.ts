@@ -2,12 +2,14 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { requirePermission } from "@/lib/auth/access";
 
 export async function createPartner(
   locationId: number,
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const partner_name = (formData.get("partnerName") as string)?.trim();
   const phone = (formData.get("phone") as string)?.trim() || null;
   const email = (formData.get("email") as string)?.trim() || null;
@@ -42,6 +44,7 @@ export async function updatePartner(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const partner_name = (formData.get("partnerName") as string)?.trim();
   const phone = (formData.get("phone") as string)?.trim() || null;
   const email = (formData.get("email") as string)?.trim() || null;
@@ -67,6 +70,7 @@ export async function updatePartner(
 }
 
 export async function deletePartner(id: number, locationId: number) {
+  await requirePermission("locations");
   const supabase = await createClient();
   await supabase.from("location_partners").delete().eq("id", id);
   revalidatePath(`/dashboard/locations/${locationId}`);

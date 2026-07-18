@@ -41,15 +41,15 @@ export function Pagination({ page, totalPages, basePath, query = {} }: Paginatio
     [
       "inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-lg text-sm font-medium transition-colors",
       active
-        ? "bg-amber-500 text-white"
+        ? "bg-amber-400 text-slate-950 shadow-sm"
         : disabled
-        ? "text-slate-300 pointer-events-none"
-        : "text-slate-600 hover:bg-slate-100",
+        ? "text-slate-300 pointer-events-none dark:text-slate-700"
+        : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
     ].join(" ");
 
   return (
-    <div className="flex items-center justify-between mt-6">
-      <p className="text-sm text-slate-500">
+    <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700">
+      <p className="text-sm text-slate-500 dark:text-slate-400">
         Page {page} of {totalPages}
       </p>
 

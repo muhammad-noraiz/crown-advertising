@@ -5,11 +5,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { buildInvoiceSchedule } from "@/lib/invoices";
 import type { BillingType, Booking, InvoiceStatus } from "@/lib/supabase/types";
+import { requirePermission } from "@/lib/auth/access";
 
 export async function createBooking(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("bookings");
   const location_id = Number(formData.get("locationId"));
   const client_id = formData.get("clientId") ? Number(formData.get("clientId")) : null;
   const client_name = (formData.get("clientName") as string)?.trim();
@@ -73,6 +75,7 @@ export async function updateBooking(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("bookings");
   const client_id = formData.get("clientId") ? Number(formData.get("clientId")) : null;
   const client_name = (formData.get("clientName") as string)?.trim();
   const amount = parseFloat((formData.get("amount") as string) ?? "0") || 0;
@@ -121,6 +124,7 @@ export async function updateBooking(
 }
 
 export async function deleteBooking(id: number, location_id: number) {
+  await requirePermission("bookings");
   const supabase = await createClient();
   await supabase.from("bookings").delete().eq("id", id);
   revalidatePath("/dashboard");
@@ -134,6 +138,7 @@ export async function createBookingAction(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("bookings");
   const location_id = Number(formData.get("locationId"));
   const client_id = formData.get("clientId") ? Number(formData.get("clientId")) : null;
   const client_name = (formData.get("clientName") as string)?.trim();

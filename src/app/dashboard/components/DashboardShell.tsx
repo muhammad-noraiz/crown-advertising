@@ -2,24 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
+import type { ManagementAccess } from "@/lib/permissions";
 
 interface Props {
   children: React.ReactNode;
-  userEmail: string | null;
+  access: ManagementAccess | null;
 }
 
-export function DashboardShell({ children, userEmail }: Props) {
+export function DashboardShell({ children, access }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [dark, setDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const storedCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
-    const storedDark = localStorage.getItem("theme-dark") === "true";
-    setCollapsed(storedCollapsed);
-    setDark(storedDark);
-    if (storedDark) document.documentElement.classList.add("dark");
-    setMounted(true);
+    const frame = window.requestAnimationFrame(() => {
+      const storedCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
+      const storedDark = localStorage.getItem("theme-dark") === "true";
+      setCollapsed(storedCollapsed);
+      setDark(storedDark);
+      if (storedDark) document.documentElement.classList.add("dark");
+      setMounted(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   function toggleCollapsed() {
@@ -46,7 +50,7 @@ export function DashboardShell({ children, userEmail }: Props) {
         onToggle={toggleCollapsed}
         dark={dark}
         onToggleDark={toggleDark}
-        userEmail={userEmail}
+        access={access}
       />
       <main
         className="transition-[padding-left] duration-300"

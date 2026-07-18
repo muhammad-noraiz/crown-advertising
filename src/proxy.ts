@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { canAccess, firstAllowedPath, permissionForPath } from '@/lib/permissions';
+import type { DashboardPermission, ManagementAccess, ManagementRole } from '@/lib/permissions';
 
 export default async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -32,6 +34,41 @@ export default async function proxy(request: NextRequest) {
 
   if (isOnDashboard && !user) {
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  if (isOnDashboard && user && pathname !== '/dashboard/access-denied') {
+    const { data } = await supabase
+      .from('management_users')
+      .select('id, email, display_name, role, permissions')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const profile = data as {
+      id: string;
+      email: string;
+      display_name: string | null;
+      role: ManagementRole;
+      permissions: DashboardPermission[];
+    } | null;
+
+    if (!profile) {
+      return NextResponse.redirect(new URL('/dashboard/access-denied', request.url));
+    }
+
+    const access: ManagementAccess = {
+      id: profile.id,
+      email: profile.email,
+      displayName: profile.display_name,
+      role: profile.role,
+      permissions: profile.permissions ?? [],
+    };
+    const requiredPermission = permissionForPath(pathname);
+    const allowed = requiredPermission === null
+      || (requiredPermission === 'users' ? access.role === 'super_admin' : canAccess(access, requiredPermission));
+
+    if (!allowed) {
+      return NextResponse.redirect(new URL(firstAllowedPath(access), request.url));
+    }
   }
 
   if (isOnLogin && user) {

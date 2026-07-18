@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { buildInvoiceSchedule } from "@/lib/invoices";
 import { createClient } from "@/lib/supabase/server";
 import type { Booking, BookingInvoice, InvoiceStatus } from "@/lib/supabase/types";
+import { requirePermission } from "@/lib/auth/access";
 
 async function authenticatedClient() {
   const supabase = await createClient();
@@ -24,6 +25,7 @@ export async function generateInvoiceSchedule(
   bookingId: number,
   _previousState: string | null
 ): Promise<string | null> {
+  await requirePermission("bookings");
   void _previousState;
   const { supabase, user } = await authenticatedClient();
   if (!user) return "You must be signed in to manage invoices.";
@@ -52,6 +54,7 @@ export async function createInvoice(
   _previousState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("bookings");
   void _previousState;
   const { supabase, user } = await authenticatedClient();
   if (!user) return "You must be signed in to manage invoices.";
@@ -96,6 +99,7 @@ export async function recordInvoicePayment(
   _previousState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("bookings");
   void _previousState;
   const { supabase, user } = await authenticatedClient();
   if (!user) return "You must be signed in to manage invoices.";
@@ -174,6 +178,7 @@ export async function recordInvoicePayment(
 }
 
 export async function cancelInvoice(invoiceId: number, bookingId: number): Promise<void> {
+  await requirePermission("bookings");
   const { supabase, user } = await authenticatedClient();
   if (!user) return;
 

@@ -7,157 +7,110 @@ import { EditClientModal } from "@/app/dashboard/clients/EditClientModal";
 import { DeleteClientButton } from "@/app/dashboard/clients/DeleteClientButton";
 import { EditBookingModal } from "@/app/dashboard/bookings/EditBookingModal";
 import { InvoiceManagerModal } from "@/app/dashboard/bookings/InvoiceManagerModal";
+import { ManagementMetric, ManagementPageHero } from "@/app/dashboard/components/ManagementPage";
 import { getBookingInvoiceStatus, getInvoiceTotals } from "@/lib/invoices";
 
 const invoiceStatusLabel: Record<string, { label: string; cls: string }> = {
-  NOT_SETUP: { label: "Not set up", cls: "bg-slate-100 text-slate-600" },
-  PENDING: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
-  PARTIAL: { label: "Part paid", cls: "bg-blue-100 text-blue-700" },
-  PAID: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
-  OVERDUE: { label: "Overdue", cls: "bg-red-100 text-red-700" },
-  CANCELLED: { label: "Cancelled", cls: "bg-slate-100 text-slate-500" },
+  NOT_SETUP: { label: "Not set up", cls: "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300" },
+  PENDING: { label: "Pending", cls: "bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300" },
+  PARTIAL: { label: "Part paid", cls: "bg-blue-100 text-blue-700 dark:bg-blue-400/10 dark:text-blue-300" },
+  PAID: { label: "Paid", cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300" },
+  OVERDUE: { label: "Overdue", cls: "bg-red-100 text-red-700 dark:bg-red-400/10 dark:text-red-300" },
+  CANCELLED: { label: "Cancelled", cls: "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400" },
 };
+
+function money(value: number) {
+  return `PKR ${Math.round(value).toLocaleString("en-PK")}`;
+}
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-
   const [{ data: clientData }, { data: bookingsData }, { data: clientsData }] = await Promise.all([
     supabase.from("clients").select("*").eq("id", Number(id)).single(),
-    supabase
-      .from("bookings")
-      .select("*, locations(id, name, size, city), booking_invoices(*)")
-      .eq("client_id", Number(id))
-      .order("start_date", { ascending: false }),
+    supabase.from("bookings").select("*, locations(id, name, size, city), booking_invoices(*)").eq("client_id", Number(id)).order("start_date", { ascending: false }),
     supabase.from("clients").select("id, name").order("name"),
   ]);
 
   if (!clientData) notFound();
-
   const client = clientData as Client;
-  const bookings = (bookingsData ?? []) as (Booking & {
-    locations: Pick<Location, "id" | "name" | "size" | "city"> | null;
-    booking_invoices: BookingInvoice[];
-  })[];
+  const bookings = (bookingsData ?? []) as (Booking & { locations: Pick<Location, "id" | "name" | "size" | "city"> | null; booking_invoices: BookingInvoice[] })[];
   const allClients = (clientsData ?? []) as { id: number; name: string }[];
-
-  const now = new Date();
-  const activeBookings = bookings.filter((b) => new Date(b.end_date) >= now);
-  const totalRevenue = bookings.reduce((sum, b) => sum + (b.amount ?? 0), 0);
+  const today = new Date().toISOString().slice(0, 10);
+  const activeBookings = bookings.filter((booking) => booking.start_date <= today && booking.end_date >= today);
+  const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.amount ?? 0), 0);
+  const invoiceTotals = getInvoiceTotals(bookings.flatMap((booking) => booking.booking_invoices ?? []));
+  const collectionRate = invoiceTotals.invoiced > 0 ? Math.round((invoiceTotals.paid / invoiceTotals.invoiced) * 100) : 0;
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <Link href="/dashboard/clients" className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
-              ← Clients
-            </Link>
-          </div>
-          <h1 className="text-xl font-bold text-slate-900">{client.name}</h1>
-          {client.company && <p className="text-slate-500 text-sm mt-0.5">{client.company}</p>}
-        </div>
-        <div className="flex gap-2">
-          <EditClientModal client={client} />
-          <DeleteClientButton id={client.id} />
-        </div>
-      </div>
+    <div className="mx-auto max-w-[1800px] space-y-6 pb-10">
+      <ManagementPageHero
+        eyebrow="Client profile"
+        title={client.name}
+        description={client.company ? `${client.company} · Complete campaign, contract and collection history.` : "Complete campaign, contract and collection history for this customer."}
+        icon="client"
+        actions={<><EditClientModal client={client} /><DeleteClientButton id={client.id} /></>}
+        meta={<>
+          <Link href="/dashboard/clients" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300 transition hover:border-amber-300/30 hover:text-amber-200">← Client directory</Link>
+          <span className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold ${activeBookings.length > 0 ? "border-emerald-300/20 bg-emerald-300/10 text-emerald-200" : "border-white/10 bg-white/[0.05] text-slate-300"}`}>{activeBookings.length > 0 ? `${activeBookings.length} live campaign${activeBookings.length === 1 ? "" : "s"}` : "No live campaigns"}</span>
+        </>}
+      />
 
-      {/* Info cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <ManagementMetric label="Total bookings" value={String(bookings.length)} detail={`${activeBookings.length} currently active`} tone="blue" icon="booking" />
+        <ManagementMetric label="Contract value" value={money(totalRevenue)} detail="All-time booked sales" tone="amber" icon="detail" />
+        <ManagementMetric label="Cash received" value={money(invoiceTotals.paid)} detail={`${collectionRate}% of invoiced value collected`} tone="emerald" icon="booking" />
+        <ManagementMetric label="Outstanding" value={money(invoiceTotals.outstanding)} detail="Open invoice balance" tone={invoiceTotals.outstanding > 0 ? "red" : "slate"} icon="client" />
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3">
         {[
-          { label: "Total Bookings", value: bookings.length },
-          { label: "Active Now", value: activeBookings.length },
-          { label: "Total Revenue (PKR)", value: totalRevenue.toLocaleString() },
-          { label: "Phone", value: client.phone ?? "—" },
-        ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">{s.label}</p>
-            <p className="text-lg font-bold text-slate-900">{s.value}</p>
-          </div>
+          { label: "Phone", value: client.phone ?? "Not provided", href: client.phone ? `tel:${client.phone}` : undefined },
+          { label: "Email", value: client.email ?? "Not provided", href: client.email ? `mailto:${client.email}` : undefined },
+          { label: "Address", value: client.address ?? "Not provided", href: undefined },
+        ].map((item) => (
+          <article key={item.label} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{item.label}</p>
+            {item.href ? <a href={item.href} className="mt-2 block break-words text-sm font-semibold text-slate-900 hover:text-amber-700 dark:text-slate-100 dark:hover:text-amber-300">{item.value}</a> : <p className="mt-2 break-words text-sm font-semibold text-slate-900 dark:text-slate-100">{item.value}</p>}
+          </article>
         ))}
-      </div>
+      </section>
 
-      {/* Contact details */}
-      {(client.email || client.address || client.notes) && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          {client.email && (
-            <div><p className="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Email</p><p className="text-slate-700">{client.email}</p></div>
-          )}
-          {client.address && (
-            <div><p className="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Address</p><p className="text-slate-700">{client.address}</p></div>
-          )}
-          {client.notes && (
-            <div><p className="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Notes</p><p className="text-slate-600">{client.notes}</p></div>
-          )}
-        </div>
-      )}
+      {client.notes && <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-400/20 dark:bg-amber-400/5"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700 dark:text-amber-300">Relationship notes</p><p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{client.notes}</p></section>}
 
-      {/* Bookings table */}
-      <div className="bg-white rounded-xl border border-slate-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Booking History</h2>
-          <span className="text-sm text-slate-400">{bookings.length} bookings</span>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_-38px_rgba(15,23,42,.75)] dark:border-slate-700">
+        <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
+          <div><h2 className="font-bold text-slate-950 dark:text-slate-50">Campaign history</h2><p className="mt-0.5 text-xs text-slate-500">Every site booked by this client with collection progress.</p></div>
+          <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-300">{bookings.length} bookings</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                {["Location", "Start", "End", "Duration", "Amount (PKR)", "Invoice", "Status", ""].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {bookings.length === 0 ? (
-                <tr><td colSpan={8} className="px-6 py-10 text-center text-slate-400">No bookings yet.</td></tr>
-              ) : (
-                bookings.map((b) => {
-                  const bs = bookingStatus(b.end_date);
-                  const bsCls = bs === "active" ? "bg-green-100 text-green-700" : bs === "expiring" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700";
-                  const bsLabel = bs === "active" ? "Active" : bs === "expiring" ? "Expiring Soon" : "Expired";
-                  const invoices = b.booking_invoices ?? [];
-                  const invoiceTotals = getInvoiceTotals(invoices);
-                  const isl = invoiceStatusLabel[getBookingInvoiceStatus(invoices)] ?? invoiceStatusLabel.PENDING;
-                  return (
-                    <tr key={b.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 font-medium text-slate-900">
-                        {b.locations ? (
-                          <Link href={`/dashboard/locations/${b.location_id}`} className="hover:text-amber-600">
-                            {b.locations.name}
-                          </Link>
-                        ) : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDate(b.start_date)}</td>
-                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{formatDate(b.end_date)}</td>
-                      <td className="px-4 py-3 text-slate-500">{b.duration}</td>
-                      <td className="px-4 py-3 font-medium text-slate-800">{(b.amount ?? 0).toLocaleString()}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isl.cls}`}>{isl.label}</span>
-                        <p className="mt-1 text-[10px] text-slate-400">PKR {Math.round(invoiceTotals.outstanding).toLocaleString()} due</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${bsCls}`}>{bsLabel}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3 whitespace-nowrap">
-                          <InvoiceManagerModal booking={b as Booking} invoices={invoices} locationName={b.locations?.name} />
-                          <EditBookingModal
-                            booking={b as Booking}
-                            location={(b.locations ?? { id: b.location_id, name: "—", size: "—", city: "—" }) as Pick<Location, "id" | "name" | "size" | "city">}
-                            clients={allClients}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+            <thead><tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/70">{["Location", "Campaign period", "Contract value", "Collection", "Invoice", "Status", "Actions"].map((heading) => <th key={heading} className="whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-[0.13em] text-slate-500">{heading}</th>)}</tr></thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+              {bookings.length === 0 ? <tr><td colSpan={7} className="px-6 py-14 text-center text-slate-400">No bookings have been created for this client.</td></tr> : bookings.map((booking) => {
+                const status = bookingStatus(booking.end_date);
+                const statusClass = status === "active" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300" : status === "expiring" ? "bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300" : "bg-red-100 text-red-700 dark:bg-red-400/10 dark:text-red-300";
+                const statusText = status === "active" ? "Active" : status === "expiring" ? "Expiring soon" : "Expired";
+                const invoices = booking.booking_invoices ?? [];
+                const totals = getInvoiceTotals(invoices);
+                const invoiceStyle = invoiceStatusLabel[getBookingInvoiceStatus(invoices)] ?? invoiceStatusLabel.PENDING;
+                const progress = totals.invoiced > 0 ? Math.min(100, (totals.paid / totals.invoiced) * 100) : 0;
+                return (
+                  <tr key={booking.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/60">
+                    <td className="px-4 py-4"><Link href={`/dashboard/locations/${booking.location_id}`} className="font-bold text-slate-950 hover:text-amber-700 dark:text-slate-50 dark:hover:text-amber-300">{booking.locations?.name ?? "Unknown location"}</Link><p className="mt-1 text-xs text-slate-400">{booking.locations ? `${booking.locations.size} · ${booking.locations.city}` : ""}</p></td>
+                    <td className="whitespace-nowrap px-4 py-4"><p className="font-semibold text-slate-700 dark:text-slate-200">{formatDate(booking.start_date)} → {formatDate(booking.end_date)}</p><p className="mt-1 text-xs text-slate-400">{booking.duration}</p></td>
+                    <td className="whitespace-nowrap px-4 py-4 font-bold text-slate-900 dark:text-slate-100">{money(booking.amount ?? 0)}</td>
+                    <td className="min-w-48 px-4 py-4"><div className="flex justify-between gap-3 text-[11px]"><span className="font-bold text-emerald-600 dark:text-emerald-300">{money(totals.paid)}</span><span className="text-slate-400">{money(totals.outstanding)} left</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${progress}%` }} /></div></td>
+                    <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${invoiceStyle.cls}`}>{invoiceStyle.label}</span></td>
+                    <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${statusClass}`}>{statusText}</span></td>
+                    <td className="px-4 py-4"><div className="flex items-center gap-3 whitespace-nowrap"><InvoiceManagerModal booking={booking as Booking} invoices={invoices} locationName={booking.locations?.name} /><EditBookingModal booking={booking as Booking} location={(booking.locations ?? { id: booking.location_id, name: "—", size: "—", city: "—" }) as Pick<Location, "id" | "name" | "size" | "city">} clients={allClients} /></div></td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { InvoiceManagerModal } from "@/app/dashboard/bookings/InvoiceManagerModa
 import { LocationImagesTab } from "./LocationImagesTab";
 import { locationCategoryLabels } from "@/lib/location-showcase-types";
 import { getBookingInvoiceStatus, getInvoiceTotals } from "@/lib/invoices";
+import { ManagementMetric, ManagementPageHero } from "@/app/dashboard/components/ManagementPage";
 
 const invoiceStatusLabel: Record<string, { label: string; cls: string }> = {
   NOT_SETUP: { label: "Not set up", cls: "bg-slate-100 text-slate-600" },
@@ -96,48 +97,46 @@ export default async function LocationDetailPage({
   const crownPercent = Math.max(0, 100 - totalPartnersPercent);
   const llt = landTypeLabel[loc.land_type ?? "crown"];
   const tabBase = `/dashboard/locations/${id}`;
+  const totalBookingValue = loc.bookings.reduce((sum, booking) => sum + (booking.amount ?? 0), 0);
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const locationInvoiceTotals = getInvoiceTotals(loc.bookings.flatMap((booking) => booking.booking_invoices ?? []));
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <Link href="/dashboard/locations" className="text-slate-400 hover:text-slate-600 text-sm transition-colors">
-              ← Locations
-            </Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-slate-900">{loc.name}</h1>
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${llt.cls}`}>
-              {llt.label}
-            </span>
-          </div>
-          <p className="text-slate-500 text-sm mt-0.5">
-            {loc.size} · {loc.city}
-            {loc.address && ` · ${loc.address}`}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium">
-            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">{formatLocationPrice(loc)}</span>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">{locationCategoryLabels[loc.media_category]}</span>
-            {loc.facing_from && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">From: {loc.facing_from}</span>}
-            {loc.facing_towards && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">Towards: {loc.facing_towards}</span>}
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <AddBookingModal locations={locations} clients={clients} defaultLocationId={loc.id} />
+    <div className="mx-auto max-w-[1800px] space-y-6 pb-10">
+      <ManagementPageHero
+        eyebrow="Location workspace"
+        title={loc.name}
+        description={`${loc.size} · ${loc.city}${loc.address ? ` · ${loc.address}` : ""}`}
+        icon="detail"
+        actions={<>
+          <AddBookingModal locations={locations} clients={clients} defaultLocationId={loc.id} buttonClassName="rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-amber-300" />
           <EditLocationModal location={loc} />
           <DeleteLocationButton id={loc.id} />
-        </div>
-      </div>
+        </>}
+        meta={<>
+          <Link href="/dashboard/locations" className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300 transition hover:border-amber-300/30 hover:text-amber-200">← Inventory directory</Link>
+          <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-[11px] font-semibold text-amber-200">{formatLocationPrice(loc)}</span>
+          <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">{llt.label}</span>
+          <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">{locationCategoryLabels[loc.media_category]}</span>
+          {loc.facing_from && <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">From {loc.facing_from}</span>}
+          {loc.facing_towards && <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">Towards {loc.facing_towards}</span>}
+        </>}
+      />
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <ManagementMetric label="Current status" value={activeBooking ? "Occupied" : "Available"} detail={activeBooking ? `Booked by ${activeBooking.client_name}` : "Ready for a new campaign"} tone={activeBooking ? "red" : "emerald"} icon="location" />
+        <ManagementMetric label="Booked value" value={`PKR ${Math.round(totalBookingValue).toLocaleString("en-PK")}`} detail={`${loc.bookings.length} lifetime booking${loc.bookings.length === 1 ? "" : "s"}`} tone="blue" icon="booking" />
+        <ManagementMetric label="Outstanding" value={`PKR ${Math.round(locationInvoiceTotals.outstanding).toLocaleString("en-PK")}`} detail="Open invoice balance at this site" tone={locationInvoiceTotals.outstanding > 0 ? "red" : "slate"} icon="client" />
+        <ManagementMetric label="Recorded expenses" value={`PKR ${Math.round(totalExpenses).toLocaleString("en-PK")}`} detail={`${expenses.length} expense entr${expenses.length === 1 ? "y" : "ies"}`} tone="amber" icon="detail" />
+      </section>
 
       {/* Active booking banner */}
       {activeBooking && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+        <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between dark:border-amber-400/20 dark:bg-amber-400/5">
           <div>
             <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-0.5">Currently Booked</p>
-            <p className="font-semibold text-slate-900">{activeBooking.client_name}</p>
-            <p className="text-sm text-slate-600">
+            <p className="font-semibold text-slate-900 dark:text-slate-100">{activeBooking.client_name}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               {formatDate(activeBooking.start_date)} → {formatDate(activeBooking.end_date)} ({activeBooking.duration})
             </p>
           </div>
@@ -148,7 +147,7 @@ export default async function LocationDetailPage({
       )}
 
       {/* Tab nav */}
-      <div className="flex gap-1 mb-6 border-b border-slate-200">
+      <nav className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1.5 dark:border-slate-700" aria-label="Location sections">
         {[
           { key: "bookings", label: `Bookings (${loc.bookings.length})` },
           { key: "expenses", label: `Expenses (${expenses.length})` },
@@ -158,34 +157,34 @@ export default async function LocationDetailPage({
           <Link
             key={key}
             href={`${tabBase}?tab=${key}`}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+            className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-bold transition-colors ${
               tab === key
-                ? "border-amber-500 text-amber-600"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "bg-slate-900 text-white shadow-sm dark:bg-amber-400 dark:text-slate-950"
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
             }`}
           >
             {label}
           </Link>
         ))}
-      </div>
+      </nav>
 
       {/* ── Bookings tab ── */}
       {tab === "bookings" && (
-        <div className="bg-white rounded-xl border border-slate-200">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-            <h2 className="font-semibold text-slate-900">Booking History</h2>
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_45px_-38px_rgba(15,23,42,.75)] dark:border-slate-700">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-700">
+            <h2 className="font-bold text-slate-950 dark:text-slate-50">Booking History</h2>
             <span className="text-sm text-slate-400">{loc.bookings.length} bookings</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50">
+                <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/70">
                   {["Starting Date", "Duration", "Ending Date", "Display (Client)", "Amount (PKR)", "Sale", "Vendor", "Locking Ref.", "Payment", "Status", "Remarks", ""].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {loc.bookings.length === 0 ? (
                   <tr>
                     <td colSpan={12} className="px-6 py-8 text-center text-slate-400">
@@ -248,17 +247,17 @@ export default async function LocationDetailPage({
             </p>
             <AddExpenseModal locationId={loc.id} />
           </div>
-          <div className="bg-white rounded-xl border border-slate-200">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50">
+                  <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/70">
                     {["Type", "Amount (PKR)", "Date", "Recurring", "Description", ""].map((h) => (
                       <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                   {expenses.length === 0 ? (
                     <tr><td colSpan={6} className="px-6 py-10 text-center text-slate-400">No expenses recorded yet.</td></tr>
                   ) : (
@@ -302,7 +301,7 @@ export default async function LocationDetailPage({
           </div>
 
           {partners.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-200 p-5 mb-4">
+            <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Ownership Split</p>
               <div className="flex h-4 rounded-full overflow-hidden gap-px">
                 {partners.map((p, i) => {
@@ -334,17 +333,17 @@ export default async function LocationDetailPage({
             </div>
           )}
 
-          <div className="bg-white rounded-xl border border-slate-200">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50">
+                  <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/70">
                     {["Partner", "Phone", "Email", "Ownership %", "Notes", ""].map((h) => (
                       <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                   {partners.length === 0 ? (
                     <tr><td colSpan={6} className="px-6 py-10 text-center text-slate-400">No partners for this location.</td></tr>
                   ) : (

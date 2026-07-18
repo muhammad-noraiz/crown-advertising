@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { requirePermission } from "@/lib/auth/access";
 
 const BUCKET = "location-images";
 
@@ -9,6 +10,7 @@ export async function uploadLocationImages(
   locationId: number,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("locations");
   const supabase = await createClient();
 
   const files = formData.getAll("images") as File[];
@@ -68,6 +70,7 @@ export async function deleteLocationImage(
   storagePath: string,
   locationId: number
 ): Promise<void> {
+  await requirePermission("locations");
   const supabase = await createClient();
 
   // Remove from storage first

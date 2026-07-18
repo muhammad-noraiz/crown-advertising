@@ -1,5 +1,7 @@
 export type InvoiceStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'OVERDUE' | 'CANCELLED';
 export type BillingType = 'monthly' | 'end_of_term';
+export type ManagementRole = 'super_admin' | 'custom';
+export type DashboardPermission = 'overview' | 'locations' | 'bookings' | 'clients' | 'accounts';
 export type LandType = 'private' | 'government' | 'crown';
 export type PricingBasis = 'monthly' | 'slot' | 'on_request';
 export type LocationMediaCategory = 'static' | 'motorway' | 'digital' | 'bridge-panel' | 'toll-plaza';
@@ -97,6 +99,17 @@ export interface InvoicePayment {
   created_at: string;
 }
 
+export interface ManagementUser {
+  id: string;
+  email: string;
+  display_name: string | null;
+  role: ManagementRole;
+  permissions: DashboardPermission[];
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Client {
   id: number;
   name: string;
@@ -184,6 +197,12 @@ export interface Database {
         Update: Partial<Omit<InvoicePayment, 'id' | 'invoice_id' | 'created_at'>>;
         Relationships: [];
       };
+      management_users: {
+        Row: ManagementUser;
+        Insert: Omit<ManagementUser, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<ManagementUser, 'id' | 'created_at' | 'updated_at'>>;
+        Relationships: [];
+      };
       clients: {
         Row: Client;
         Insert: Omit<Client, 'id' | 'created_at' | 'updated_at'>;
@@ -213,6 +232,8 @@ export interface Database {
     Enums: {
       invoice_status: InvoiceStatus;
       billing_type: BillingType;
+      management_role: ManagementRole;
+      dashboard_permission: DashboardPermission;
       land_type: LandType;
       expense_type: ExpenseType;
     };

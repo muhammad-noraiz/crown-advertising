@@ -4,11 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTransition } from "react";
 import { logout } from "@/actions/auth";
+import { canAccess } from "@/lib/permissions";
+import type { DashboardPermission, ManagementAccess } from "@/lib/permissions";
 
 const navItems = [
   {
     href: "/dashboard",
     label: "Overview",
+    permission: "overview" as DashboardPermission,
     icon: (
       <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -18,6 +21,7 @@ const navItems = [
   {
     href: "/dashboard/locations",
     label: "Locations",
+    permission: "locations" as DashboardPermission,
     icon: (
       <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -28,6 +32,7 @@ const navItems = [
   {
     href: "/dashboard/bookings",
     label: "All Bookings",
+    permission: "bookings" as DashboardPermission,
     icon: (
       <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -37,6 +42,7 @@ const navItems = [
   {
     href: "/dashboard/clients",
     label: "Clients",
+    permission: "clients" as DashboardPermission,
     icon: (
       <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
@@ -46,6 +52,7 @@ const navItems = [
   {
     href: "/dashboard/accounts",
     label: "Accounts",
+    permission: "accounts" as DashboardPermission,
     icon: (
       <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
@@ -54,15 +61,25 @@ const navItems = [
   },
 ];
 
+const usersNavItem = {
+  href: "/dashboard/users",
+  label: "User Access",
+  icon: (
+    <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M22 11h-6" />
+    </svg>
+  ),
+};
+
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
   dark: boolean;
   onToggleDark: () => void;
-  userEmail: string | null;
+  access: ManagementAccess | null;
 }
 
-export function Sidebar({ collapsed, onToggle, dark, onToggleDark, userEmail }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, dark, onToggleDark, access }: SidebarProps) {
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
 
@@ -75,8 +92,10 @@ export function Sidebar({ collapsed, onToggle, dark, onToggleDark, userEmail }: 
     startTransition(() => logout());
   }
 
-  const userInitial = userEmail ? userEmail[0].toUpperCase() : "A";
-  const userName = userEmail ? userEmail.split("@")[0] : "Admin";
+  const visibleNavItems = access ? navItems.filter((item) => canAccess(access, item.permission)) : [];
+  const userEmail = access?.email ?? null;
+  const userInitial = (access?.displayName || userEmail || "A")[0].toUpperCase();
+  const userName = access?.displayName || (userEmail ? userEmail.split("@")[0] : "Admin");
 
   return (
     <aside
@@ -99,7 +118,7 @@ export function Sidebar({ collapsed, onToggle, dark, onToggleDark, userEmail }: 
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -116,6 +135,22 @@ export function Sidebar({ collapsed, onToggle, dark, onToggleDark, userEmail }: 
             {!collapsed && <span className="truncate">{item.label}</span>}
           </Link>
         ))}
+        {access?.role === "super_admin" && (
+          <Link
+            href={usersNavItem.href}
+            title={collapsed ? usersNavItem.label : undefined}
+            className={`flex items-center rounded-lg py-2.5 text-sm font-medium transition-colors ${
+              collapsed ? "mx-auto w-10 justify-center" : "w-full gap-3 px-3"
+            } ${
+              isActive(usersNavItem.href)
+                ? "bg-amber-500/10 text-amber-400"
+                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+            }`}
+          >
+            <span className={isActive(usersNavItem.href) ? "text-amber-400" : ""}>{usersNavItem.icon}</span>
+            {!collapsed && <span className="truncate">{usersNavItem.label}</span>}
+          </Link>
+        )}
       </nav>
 
       {/* Controls: dark mode + collapse */}
@@ -185,6 +220,9 @@ export function Sidebar({ collapsed, onToggle, dark, onToggleDark, userEmail }: 
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-white truncate leading-tight">{userName}</p>
               <p className="text-xs text-slate-500 truncate">{userEmail}</p>
+              <p className="mt-1 text-[9px] font-bold uppercase tracking-wider text-amber-500/80">
+                {access?.role === "super_admin" ? "Super Admin" : "Custom Access"}
+              </p>
             </div>
           )}
         </div>

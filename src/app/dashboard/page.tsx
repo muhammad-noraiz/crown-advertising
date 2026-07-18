@@ -4,6 +4,8 @@ import type { Booking, BookingInvoice, InvoicePayment, Location } from "@/lib/su
 import { formatDate, bookingStatus } from "@/lib/utils";
 import { AddLocationModal } from "./locations/AddLocationModal";
 import { AddBookingModal } from "./bookings/AddBookingModal";
+import { getCurrentAccess } from "@/lib/auth/access";
+import { canAccess } from "@/lib/permissions";
 
 type DashboardBooking = Booking & {
   locations: Pick<Location, "id" | "name" | "size" | "city"> | null;
@@ -186,6 +188,7 @@ const statusLabel: Record<string, { label: string; cls: string }> = {
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+  const access = await getCurrentAccess();
   const now = new Date();
   const today = dateOnly(now);
   const sevenDaysFromNow = dateOnly(addDays(now, 7));
@@ -290,12 +293,14 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <AddLocationModal />
-            <AddBookingModal
-              locations={locations}
-              clients={clients}
-              buttonClassName="rounded-lg bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-[0_10px_28px_-14px_rgba(251,191,36,.9)] transition hover:-translate-y-0.5 hover:bg-amber-300"
-            />
+            {access && canAccess(access, "locations") && <AddLocationModal />}
+            {access && canAccess(access, "bookings") && (
+              <AddBookingModal
+                locations={locations}
+                clients={clients}
+                buttonClassName="rounded-lg bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-[0_10px_28px_-14px_rgba(251,191,36,.9)] transition hover:-translate-y-0.5 hover:bg-amber-300"
+              />
+            )}
           </div>
         </div>
       </section>
@@ -442,8 +447,10 @@ export default async function DashboardPage() {
               {recentBookings.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                    No bookings yet.{' '}
-                    <AddBookingModal locations={locations} clients={clients} buttonClassName="text-sm font-bold text-amber-600 hover:underline" buttonLabel="Add the first one →" />
+                    No bookings yet.
+                    {access && canAccess(access, "bookings") && (
+                      <> {' '}<AddBookingModal locations={locations} clients={clients} buttonClassName="text-sm font-bold text-amber-600 hover:underline" buttonLabel="Add the first one →" /></>
+                    )}
                   </td>
                 </tr>
               ) : recentBookings.map((booking) => {

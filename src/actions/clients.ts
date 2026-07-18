@@ -3,11 +3,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requirePermission } from "@/lib/auth/access";
 
 export async function createClient_(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("clients");
   const name = (formData.get("name") as string)?.trim();
   const company = (formData.get("company") as string)?.trim() || null;
   const phone = (formData.get("phone") as string)?.trim() || null;
@@ -34,6 +36,7 @@ export async function updateClient(
   _prevState: string | null,
   formData: FormData
 ): Promise<string | null> {
+  await requirePermission("clients");
   const name = (formData.get("name") as string)?.trim();
   const company = (formData.get("company") as string)?.trim() || null;
   const phone = (formData.get("phone") as string)?.trim() || null;
@@ -57,6 +60,7 @@ export async function updateClient(
 }
 
 export async function deleteClient(id: number) {
+  await requirePermission("clients");
   const supabase = await createClient();
   await supabase.from("clients").delete().eq("id", id);
   revalidatePath("/dashboard/clients");
