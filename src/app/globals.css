@@ -26,6 +26,17 @@ a {
   text-decoration: none;
 }
 
+/* Modals render inside dark `text-white` heroes; form controls must not inherit
+   that colour. In @layer base so any explicit text-* utility still wins. */
+@layer base {
+  input,
+  select,
+  textarea,
+  option {
+    color: #0f172a;
+  }
+}
+
 ::selection {
   background: #d4ea52;
   color: #0d100b;
