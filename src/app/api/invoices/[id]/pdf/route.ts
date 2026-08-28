@@ -2,9 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@/lib/supabase/server";
 import { requirePermission } from "@/lib/auth/access";
-import { createInvoicePdf, type InvoiceDocumentKind, type InvoicePdfPayment } from "@/lib/invoice-pdf";
-import { getInvoiceStatus } from "@/lib/invoices";
-import type { Booking, BookingInvoice, Client, InvoicePayment, Location } from "@/lib/supabase/types";
+import { createInvoicePdf, type InvoiceDocumentKind } from "@/lib/invoice-pdf";
+import type { Booking, BookingInvoice, Client, Location } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,20 +39,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (bookingError || !bookingData) return Response.json({ error: "The booking for this invoice was not found." }, { status: 404 });
   const booking = bookingData as Booking;
 
-  const [locationResult, clientResult, paymentsResult] = await Promise.all([
+  const [locationResult, clientResult] = await Promise.all([
     supabase.from("locations").select("*").eq("id", booking.location_id).single(),
     booking.client_id ? supabase.from("clients").select("*").eq("id", booking.client_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
-    supabase.from("invoice_payments").select("*").eq("invoice_id", invoice.id).order("payment_date", { ascending: false }),
   ]);
   if (locationResult.error || !locationResult.data) return Response.json({ error: "The location for this invoice was not found." }, { status: 404 });
   const location = locationResult.data as Location;
   const client = clientResult.data as Client | null;
-  const payments = paymentsResult.error ? [] : ((paymentsResult.data ?? []) as InvoicePayment[]);
-  const paymentRows: InvoicePdfPayment[] = payments.length > 0
-    ? payments.map((payment) => ({ amount: payment.amount, paymentDate: payment.payment_date, reference: payment.payment_reference }))
-    : invoice.paid_amount > 0
-      ? [{ amount: invoice.paid_amount, paymentDate: invoice.last_payment_date ?? invoice.updated_at, reference: invoice.payment_reference }]
-      : [];
 
   let logoBytes: Uint8Array | undefined;
   try {
@@ -66,30 +58,24 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     kind,
     invoiceNo: invoice.invoice_no,
     issuedAt: kind === "receipt" ? invoice.last_payment_date ?? invoice.updated_at : invoice.created_at,
-    dueDate: invoice.due_date,
     periodStart: invoice.period_start,
     periodEnd: invoice.period_end,
     amount: invoice.amount,
     paidAmount: invoice.paid_amount,
     outstanding: Math.max(0, invoice.amount - invoice.paid_amount),
-    invoiceStatus: getInvoiceStatus(invoice),
-    notes: invoice.notes,
     client: {
       name: client?.name ?? booking.client_name,
       company: client?.company ?? null,
-      email: client?.email ?? null,
-      phone: client?.phone ?? null,
       address: client?.address ?? null,
     },
-    location: { name: location.name, size: location.size, city: location.city, address: location.address },
-    booking: {
-      startDate: booking.start_date,
-      endDate: booking.end_date,
-      duration: booking.duration,
-      lockingRef: booking.locking_ref,
-      salePerson: booking.sale_person,
+    location: {
+      name: location.name,
+      size: location.size,
+      city: location.city,
+      facingTowards: location.facing_towards,
+      mediaCategory: location.media_category,
     },
-    payments: paymentRows,
+    booking: { startDate: booking.start_date, endDate: booking.end_date, vendor: booking.vendor },
   }, logoBytes);
 
   const label = kind === "receipt" ? "payment-receipt" : "payment-request";
