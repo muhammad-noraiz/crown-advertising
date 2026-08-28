@@ -10,12 +10,13 @@ import { DeleteExpenseButton } from "./DeleteExpenseButton";
 import { AddPartnerModal } from "./AddPartnerModal";
 import { EditPartnerModal } from "./EditPartnerModal";
 import { DeletePartnerButton } from "./DeletePartnerButton";
-import type { LocationWithBookings, Booking, LocationExpense, LocationPartner, LocationImage } from "@/lib/supabase/types";
+import type { LocationWithBookings, Booking, LocationExpense, LocationPartner, LocationImage, LocationDocument } from "@/lib/supabase/types";
 import { AddBookingModal } from "@/app/dashboard/bookings/AddBookingModal";
 import { EditLocationModal } from "@/app/dashboard/locations/EditLocationModal";
 import { EditBookingModal } from "@/app/dashboard/bookings/EditBookingModal";
 import { InvoiceManagerModal } from "@/app/dashboard/bookings/InvoiceManagerModal";
 import { LocationImagesTab } from "./LocationImagesTab";
+import { LocationDocumentsTab } from "./LocationDocumentsTab";
 import { locationCategoryLabels } from "@/lib/location-showcase-types";
 import { getBookingInvoiceStatus, getInvoiceTotals } from "@/lib/invoices";
 import { ManagementMetric, ManagementPageHero } from "@/app/dashboard/components/ManagementPage";
@@ -73,7 +74,7 @@ export default async function LocationDetailPage({
   const tab = rawTab ?? "bookings";
 
   const supabase = await createClient();
-  const [{ data: location }, { data: allLocations }, { data: expensesData }, { data: partnersData }, { data: clientsData }, { data: imagesData }] =
+  const [{ data: location }, { data: allLocations }, { data: expensesData }, { data: partnersData }, { data: clientsData }, { data: imagesData }, { data: documentsData }] =
     await Promise.all([
       supabase.from("locations").select("*, bookings(*, booking_invoices(*))").eq("id", Number(id)).single(),
       supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
@@ -81,6 +82,7 @@ export default async function LocationDetailPage({
       supabase.from("location_partners").select("*").eq("location_id", Number(id)).order("partner_name"),
       supabase.from("clients").select("id, name, email").order("name"),
       supabase.from("location_images").select("*").eq("location_id", Number(id)).order("created_at", { ascending: false }),
+      supabase.from("location_documents").select("*").eq("location_id", Number(id)).order("created_at", { ascending: false }),
     ]);
 
   if (!location) notFound();
@@ -92,6 +94,20 @@ export default async function LocationDetailPage({
   const clients = (clientsData ?? []) as { id: number; name: string; email: string | null }[];
   const clientEmailById = new Map(clients.map((client) => [client.id, client.email]));
   const images = (imagesData ?? []) as LocationImage[];
+  const documents = (documentsData ?? []) as LocationDocument[];
+
+  // The documents bucket is private, so each row needs a short-lived signed URL.
+  // Only worth minting them when that tab is the one being rendered.
+  let documentUrls: Record<string, string> = {};
+  if (tab === "documents" && documents.length > 0) {
+    const { data: signed } = await supabase.storage
+      .from("location-documents")
+      .createSignedUrls(documents.map((doc) => doc.storage_path), 60 * 60);
+    documentUrls = Object.fromEntries(
+      (signed ?? []).flatMap((entry) => (entry.path && entry.signedUrl ? [[entry.path, entry.signedUrl] as [string, string]] : []))
+    );
+  }
+
   const now = new Date();
   const activeBooking = loc.bookings.find((b) => new Date(b.start_date) <= now && new Date(b.end_date) >= now);
   const totalPartnersPercent = partners.reduce((s, p) => s + p.percentage, 0);
@@ -154,6 +170,7 @@ export default async function LocationDetailPage({
           { key: "expenses", label: `Expenses (${expenses.length})` },
           { key: "partners", label: `Partners (${partners.length})` },
           { key: "images", label: `Images (${images.length})` },
+          { key: "documents", label: `Legal Documents (${documents.length})` },
         ].map(({ key, label }) => (
           <Link
             key={key}
@@ -376,6 +393,11 @@ export default async function LocationDetailPage({
       {/* Images tab */}
       {tab === "images" && (
         <LocationImagesTab locationId={loc.id} images={images} />
+      )}
+
+      {/* Legal documents tab */}
+      {tab === "documents" && (
+        <LocationDocumentsTab locationId={loc.id} documents={documents} urls={documentUrls} />
       )}
     </div>
   );

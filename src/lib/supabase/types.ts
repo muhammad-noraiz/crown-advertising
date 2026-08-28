@@ -165,6 +165,17 @@ export interface LocationImage {
   created_at: string;
 }
 
+/** Legal paperwork for a site — agreements, NOCs, ownership papers. Stored in a private bucket. */
+export interface LocationDocument {
+  id: number;
+  location_id: number;
+  storage_path: string;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number | null;
+  created_at: string;
+}
+
 export interface BookingWithClient extends Booking {
   clients: Pick<Client, 'id' | 'name' | 'company'> | null;
   locations: Pick<Location, 'id' | 'name' | 'size' | 'city'> | null;
@@ -225,6 +236,12 @@ export interface Database {
         Row: LocationImage;
         Insert: Omit<LocationImage, 'id' | 'created_at'>;
         Update: Partial<Omit<LocationImage, 'id' | 'created_at'>>;
+        Relationships: [];
+      };
+      location_documents: {
+        Row: LocationDocument;
+        Insert: Omit<LocationDocument, 'id' | 'created_at'>;
+        Update: Partial<Omit<LocationDocument, 'id' | 'created_at'>>;
         Relationships: [];
       };
     };
