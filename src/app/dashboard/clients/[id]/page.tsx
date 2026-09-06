@@ -8,6 +8,7 @@ import { DeleteClientButton } from "@/app/dashboard/clients/DeleteClientButton";
 import { EditBookingModal } from "@/app/dashboard/bookings/EditBookingModal";
 import { InvoiceManagerModal } from "@/app/dashboard/bookings/InvoiceManagerModal";
 import { ManagementMetric, ManagementPageHero } from "@/app/dashboard/components/ManagementPage";
+import { clientDisplayNames } from "@/lib/clients";
 import { getBookingInvoiceStatus, getInvoiceTotals } from "@/lib/invoices";
 
 const invoiceStatusLabel: Record<string, { label: string; cls: string }> = {
@@ -42,12 +43,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const invoiceTotals = getInvoiceTotals(bookings.flatMap((booking) => booking.booking_invoices ?? []));
   const collectionRate = invoiceTotals.invoiced > 0 ? Math.round((invoiceTotals.paid / invoiceTotals.invoiced) * 100) : 0;
 
+  const clientNames = clientDisplayNames(client);
+
   return (
     <div className="mx-auto max-w-[1800px] space-y-6 pb-10">
       <ManagementPageHero
         eyebrow="Client profile"
-        title={client.name}
-        description={client.company ? `${client.company} · Complete campaign, contract and collection history.` : "Complete campaign, contract and collection history for this customer."}
+        title={clientNames.primary}
+        description={`${clientNames.secondary} · Complete campaign, contract and collection history.`}
         icon="client"
         actions={<><EditClientModal client={client} /><DeleteClientButton id={client.id} /></>}
         meta={<>
@@ -101,8 +104,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                     <td className="whitespace-nowrap px-4 py-4"><p className="font-semibold text-slate-700 dark:text-slate-200">{formatDate(booking.start_date)} → {formatDate(booking.end_date)}</p><p className="mt-1 text-xs text-slate-400">{booking.duration}</p></td>
                     <td className="whitespace-nowrap px-4 py-4 font-bold text-slate-900 dark:text-slate-100">{money(booking.amount ?? 0)}</td>
                     <td className="min-w-48 px-4 py-4"><div className="flex justify-between gap-3 text-[11px]"><span className="font-bold text-emerald-600 dark:text-emerald-300">{money(totals.paid)}</span><span className="text-slate-400">{money(totals.outstanding)} left</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${progress}%` }} /></div></td>
-                    <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${invoiceStyle.cls}`}>{invoiceStyle.label}</span></td>
-                    <td className="px-4 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${statusClass}`}>{statusText}</span></td>
+                    <td className="px-4 py-4"><span className={`inline-flex rounded-full whitespace-nowrap px-2.5 py-1 text-[11px] font-bold ${invoiceStyle.cls}`}>{invoiceStyle.label}</span></td>
+                    <td className="px-4 py-4"><span className={`inline-flex rounded-full whitespace-nowrap px-2.5 py-1 text-[11px] font-bold ${statusClass}`}>{statusText}</span></td>
                     <td className="px-4 py-4"><div className="flex items-center gap-3 whitespace-nowrap"><InvoiceManagerModal booking={booking as Booking} invoices={invoices} locationName={booking.locations?.name} clientEmail={client.email} /><EditBookingModal booking={booking as Booking} location={(booking.locations ?? { id: booking.location_id, name: "—", size: "—", city: "—" }) as Pick<Location, "id" | "name" | "size" | "city">} clients={allClients} /></div></td>
                   </tr>
                 );

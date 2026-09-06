@@ -7,8 +7,10 @@ import { DeleteClientButton } from "./DeleteClientButton";
 import { Pagination } from "@/app/dashboard/components/Pagination";
 import { SearchBox } from "@/app/dashboard/components/SearchBox";
 import { ManagementMetric, ManagementPageHero } from "@/app/dashboard/components/ManagementPage";
+import { clientDisplayNames } from "@/lib/clients";
 
 const PAGE_SIZE = 20;
+
 const CLIENT_SEARCH_COLUMNS = ["name", "company", "phone", "email", "address", "notes"];
 
 function searchFilter(columns: string[], query: string) {
@@ -127,12 +129,13 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
                   const active = clientBookings.filter((booking) => booking.start_date <= today && booking.end_date >= today).length;
                   const contractValue = clientBookings.reduce((sum, booking) => sum + (booking.amount ?? 0), 0);
                   const outstanding = outstandingByClient.get(client.id) ?? 0;
+                  const names = clientDisplayNames(client);
                   return (
                     <tr key={client.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/60">
                       <td className="px-5 py-4">
                         <div className="flex min-w-56 items-center gap-3">
-                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-100 text-xs font-bold text-amber-800 dark:bg-amber-400/10 dark:text-amber-300">{initials(client.name)}</span>
-                          <div className="min-w-0"><Link href={`/dashboard/clients/${client.id}`} className="font-bold text-slate-950 hover:text-amber-700 dark:text-slate-50 dark:hover:text-amber-300">{client.name}</Link><p className="mt-0.5 truncate text-xs text-slate-500">{client.company ?? "Independent advertiser"}</p></div>
+                          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-100 text-xs font-bold text-amber-800 dark:bg-amber-400/10 dark:text-amber-300">{initials(names.primary)}</span>
+                          <div className="min-w-0"><Link href={`/dashboard/clients/${client.id}`} className="font-bold text-slate-950 hover:text-amber-700 dark:text-slate-50 dark:hover:text-amber-300">{names.primary}</Link><p className="mt-0.5 truncate text-xs text-slate-500">{names.secondary}</p></div>
                         </div>
                       </td>
                       <td className="px-5 py-4"><p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{client.phone ?? "No phone"}</p><p className="mt-1 text-xs text-slate-400">{client.email ?? "No email"}</p></td>

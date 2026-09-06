@@ -7,7 +7,7 @@ import {
   getInvoiceStatus,
   getInvoiceTotals,
 } from "@/lib/invoices";
-import type { Booking, BookingInvoice, BookingWithLocation, Location } from "@/lib/supabase/types";
+import type { Booking, BookingInvoice, BookingWithLocation, Location, BookingFormLocation } from "@/lib/supabase/types";
 import { AddBookingModal } from "./AddBookingModal";
 import { EditBookingModal } from "./EditBookingModal";
 import { InvoiceManagerModal } from "./InvoiceManagerModal";
@@ -76,12 +76,12 @@ export default async function BookingsPage({
 
   const supabase = await createClient();
   const [{ data: locationData }, { data: clientsData }, { data: invoiceData }] = await Promise.all([
-    supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
+    supabase.from("locations").select("id, name, size, city, is_outsourced, outsourced_from, purchase_price").eq("is_active", true).order("name"),
     supabase.from("clients").select("id, name, email").order("name"),
     supabase.from("booking_invoices").select("*"),
   ]);
 
-  const locations = (locationData ?? []) as { id: number; name: string; size: string; city: string }[];
+  const locations = (locationData ?? []) as BookingFormLocation[];
   const clients = (clientsData ?? []) as { id: number; name: string; email: string | null }[];
   const clientEmailById = new Map(clients.map((client) => [client.id, client.email]));
   const allInvoices = (invoiceData ?? []) as BookingInvoice[];
@@ -250,10 +250,10 @@ export default async function BookingsPage({
                         <p className="mt-1.5 text-[10px] text-slate-400">{invoices.length} invoice{invoices.length === 1 ? "" : "s"}</p>
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${paymentStyle.cls}`}>{paymentStyle.label}</span>
+                        <span className={`inline-flex rounded-full whitespace-nowrap px-2.5 py-1 text-[11px] font-semibold ${paymentStyle.cls}`}>{paymentStyle.label}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${bookingStyle.cls}`}>{bookingStyle.label}</span>
+                        <span className={`inline-flex rounded-full whitespace-nowrap px-2.5 py-1 text-[11px] font-semibold ${bookingStyle.cls}`}>{bookingStyle.label}</span>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3 whitespace-nowrap">

@@ -11,7 +11,7 @@ const navItems = [
   {
     href: "/dashboard",
     label: "Overview",
-    permission: "overview" as DashboardPermission,
+    permission: "overview" as DashboardPermission | null,
     icon: (
       <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -59,6 +59,17 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    href: "/dashboard/alerts",
+    label: "Alerts",
+    // Content is filtered per section, so any dashboard user can open the feed.
+    permission: null,
+    icon: (
+      <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+      </svg>
+    ),
+  },
 ];
 
 const usersNavItem = {
@@ -77,9 +88,10 @@ interface SidebarProps {
   dark: boolean;
   onToggleDark: () => void;
   access: ManagementAccess | null;
+  alertCount: number;
 }
 
-export function Sidebar({ collapsed, onToggle, dark, onToggleDark, access }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, dark, onToggleDark, access, alertCount }: SidebarProps) {
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
 
@@ -92,7 +104,9 @@ export function Sidebar({ collapsed, onToggle, dark, onToggleDark, access }: Sid
     startTransition(() => logout());
   }
 
-  const visibleNavItems = access ? navItems.filter((item) => canAccess(access, item.permission)) : [];
+  const visibleNavItems = access
+    ? navItems.filter((item) => item.permission === null || canAccess(access, item.permission))
+    : [];
   const userEmail = access?.email ?? null;
   const userInitial = (access?.displayName || userEmail || "A")[0].toUpperCase();
   const userName = access?.displayName || (userEmail ? userEmail.split("@")[0] : "Admin");
@@ -118,23 +132,37 @@ export function Sidebar({ collapsed, onToggle, dark, onToggleDark, access }: Sid
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">
-        {visibleNavItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            title={collapsed ? item.label : undefined}
-            className={`flex items-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              collapsed ? "justify-center w-10 mx-auto" : "gap-3 px-3 w-full"
-            } ${
-              isActive(item.href)
-                ? "bg-amber-500/10 text-amber-400"
-                : "text-slate-400 hover:text-white hover:bg-slate-800"
-            }`}
-          >
-            <span className={isActive(item.href) ? "text-amber-400" : ""}>{item.icon}</span>
-            {!collapsed && <span className="truncate">{item.label}</span>}
-          </Link>
-        ))}
+        {visibleNavItems.map((item) => {
+          const badge = item.href === "/dashboard/alerts" && alertCount > 0 ? alertCount : null;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={collapsed && badge ? `${item.label} (${badge})` : collapsed ? item.label : undefined}
+              className={`relative flex items-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                collapsed ? "justify-center w-10 mx-auto" : "gap-3 px-3 w-full"
+              } ${
+                isActive(item.href)
+                  ? "bg-amber-500/10 text-amber-400"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              <span className={isActive(item.href) ? "text-amber-400" : ""}>{item.icon}</span>
+              {!collapsed && <span className="truncate">{item.label}</span>}
+              {badge !== null && (
+                <span
+                  className={`grid place-items-center rounded-full bg-red-500 font-bold text-white ${
+                    collapsed
+                      ? "absolute right-0 top-1 h-4 min-w-4 px-1 text-[9px]"
+                      : "ml-auto h-5 min-w-5 px-1.5 text-[10px]"
+                  }`}
+                >
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
         {access?.role === "super_admin" && (
           <Link
             href={usersNavItem.href}

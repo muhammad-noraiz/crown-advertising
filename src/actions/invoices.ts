@@ -21,9 +21,17 @@ function refreshInvoiceViews(bookingId: number) {
   revalidatePath(`/dashboard/bookings/${bookingId}`);
 }
 
+/** booking_invoices is UNIQUE (booking_id, invoice_no); 23505 means the number is taken. */
+function invoiceNumberError(error: { code?: string; message: string }, invoiceNo: string): string {
+  return error.code === "23505"
+    ? `Invoice number "${invoiceNo}" is already used on this booking.`
+    : error.message;
+}
+
 export async function generateInvoiceSchedule(
   bookingId: number,
-  _previousState: string | null
+  _previousState: string | null,
+  formData?: FormData
 ): Promise<string | null> {
   await requirePermission("bookings");
   void _previousState;
@@ -39,11 +47,12 @@ export async function generateInvoiceSchedule(
   if (countError) return countError.message;
   if ((count ?? 0) > 0) return "This booking already has invoices. Add individual invoices instead.";
 
-  const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">);
+  const invoiceNoBase = (formData?.get("invoiceNoBase") as string)?.trim() || null;
+  const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">, invoiceNoBase);
   if (invoices.length === 0) return "A positive contract amount and valid booking dates are required.";
 
   const { error } = await supabase.from("booking_invoices").insert(invoices);
-  if (error) return error.message;
+  if (error) return invoiceNumberError(error, invoices[0].invoice_no);
 
   refreshInvoiceViews(bookingId);
   return "ok";
@@ -87,7 +96,35 @@ export async function createInvoice(
     notes,
   });
 
-  if (error) return error.message;
+  if (error) return invoiceNumberError(error, invoiceNo);
+
+  refreshInvoiceViews(bookingId);
+  return "ok";
+}
+
+/** Renames an existing invoice, so auto-generated numbers can be replaced with the real one. */
+export async function updateInvoiceNumber(
+  invoiceId: number,
+  bookingId: number,
+  _previousState: string | null,
+  formData: FormData
+): Promise<string | null> {
+  await requirePermission("bookings");
+  void _previousState;
+  const { supabase, user } = await authenticatedClient();
+  if (!user) return "You must be signed in to manage invoices.";
+
+  const invoiceNo = (formData.get("invoiceNo") as string)?.trim();
+  if (!invoiceNo) return "Enter an invoice number.";
+  if (invoiceNo.length > 60) return "Invoice number must be 60 characters or fewer.";
+
+  const { error } = await supabase
+    .from("booking_invoices")
+    .update({ invoice_no: invoiceNo })
+    .eq("id", invoiceId)
+    .eq("booking_id", bookingId);
+
+  if (error) return invoiceNumberError(error, invoiceNo);
 
   refreshInvoiceViews(bookingId);
   return "ok";

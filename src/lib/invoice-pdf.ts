@@ -55,6 +55,7 @@ function cleanText(value: string | null | undefined): string {
     .replace(/[–—]/g, "-")
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, '"')
+    .replace(/[×✕✖]/g, "x")
     .replace(/[^\x20-\x7E]/g, "?");
 }
 
@@ -87,7 +88,10 @@ function money(value: number): string {
 
 /** "60x15" splits into its own columns; anything else stays whole and spans both. */
 export function sizeParts(size: string): [string, string | null] {
-  const match = cleanText(size).match(/(\d+(?:\.\d+)?)\s*[xX*]\s*(\d+(?:\.\d+)?)/);
+  // Matched on the raw value, not the cleaned one: sizes are stored with the
+  // multiplication sign (60x40 as U+00D7), which cleanText would flatten before
+  // the split could see it.
+  const match = (size ?? "").match(/(\d+(?:\.\d+)?)\s*(?:[xX×✕✖*]|by)\s*(\d+(?:\.\d+)?)/);
   return match ? [match[1], match[2]] : [cleanText(size), null];
 }
 

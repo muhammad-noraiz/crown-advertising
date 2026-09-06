@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { requirePermission } from "@/lib/auth/access";
+import { isDocumentType } from "@/lib/documents";
 
 const BUCKET = "location-documents";
 const MAX_BYTES = 20 * 1024 * 1024;
@@ -23,6 +24,20 @@ export async function uploadLocationDocuments(
 
   const files = (formData.getAll("documents") as File[]).filter((file) => file.size > 0);
   if (!files.length) return "Please select at least one document.";
+
+  const documentType = (formData.get("documentType") as string) ?? "";
+  if (!isDocumentType(documentType)) return "Please choose a document type.";
+
+  // Optional: plenty of paperwork — ownership papers, one-off certificates — never expires.
+  const validFromInput = (formData.get("validFrom") as string)?.trim() || null;
+  const validUntilInput = (formData.get("validUntil") as string)?.trim() || null;
+  const isDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+  if ((validFromInput && !isDate(validFromInput)) || (validUntilInput && !isDate(validUntilInput))) {
+    return "The validity period must be given as dates.";
+  }
+  if (validFromInput && validUntilInput && validFromInput > validUntilInput) {
+    return "The validity period cannot end before it starts.";
+  }
 
   for (const file of files) {
     if (!ALLOWED_TYPES.test(file.type)) {
@@ -53,6 +68,9 @@ export async function uploadLocationDocuments(
       file_name: file.name,
       mime_type: file.type,
       size_bytes: file.size,
+      document_type: documentType,
+      valid_from: validFromInput,
+      valid_until: validUntilInput,
     });
 
     if (dbError) {

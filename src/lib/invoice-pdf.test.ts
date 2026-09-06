@@ -21,3 +21,10 @@ test("size splits into W and H, or stays whole when it is free text", () => {
   assert.deepEqual(sizeParts("160 X 30"), ["160", "30"]);
   assert.deepEqual(sizeParts("Custom banner"), ["Custom banner", null]);
 });
+
+test("the multiplication sign every stored size actually uses still splits", () => {
+  // Production stores 60x40 as "60\u00d7 40" — cleanText used to flatten it to "60?40".
+  assert.deepEqual(sizeParts("60\u00d740"), ["60", "40"]);
+  assert.deepEqual(sizeParts("60 \u00d7 20"), ["60", "20"]);
+  assert.deepEqual(sizeParts("12.5\u00d76"), ["12.5", "6"]);
+});

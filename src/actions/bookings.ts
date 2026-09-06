@@ -55,7 +55,8 @@ export async function createBooking(
   if (error) return error.message;
 
   if (formData.get("generateInvoices") === "on") {
-    const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">);
+    const invoiceNoBase = (formData.get("invoiceNoBase") as string)?.trim() || null;
+    const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">, invoiceNoBase);
     const { error: invoiceError } = await supabase.from("booking_invoices").insert(invoices);
     if (invoiceError) {
       await supabase.from("bookings").delete().eq("id", bookingData.id);
@@ -181,7 +182,8 @@ export async function createBookingAction(
   if (error) return error.message;
 
   if (formData.get("generateInvoices") === "on") {
-    const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">);
+    const invoiceNoBase = (formData.get("invoiceNoBase") as string)?.trim() || null;
+    const invoices = buildInvoiceSchedule(bookingData as Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">, invoiceNoBase);
     const { error: invoiceError } = await supabase.from("booking_invoices").insert(invoices);
     if (invoiceError) {
       await supabase.from("bookings").delete().eq("id", bookingData.id);

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import type { Booking, BookingInvoice, InvoicePayment, Location } from "@/lib/supabase/types";
+import type { Booking, BookingInvoice, InvoicePayment, Location, BookingFormLocation } from "@/lib/supabase/types";
 import { formatDate, bookingStatus } from "@/lib/utils";
 import { AddLocationModal } from "./locations/AddLocationModal";
 import { AddBookingModal } from "./bookings/AddBookingModal";
@@ -194,14 +194,14 @@ export default async function DashboardPage() {
   const sevenDaysFromNow = dateOnly(addDays(now, 7));
 
   const [locationsResult, clientsResult, bookingsResult, invoicesResult, paymentsResult] = await Promise.all([
-    supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
+    supabase.from("locations").select("id, name, size, city, is_outsourced, outsourced_from, purchase_price").eq("is_active", true).order("name"),
     supabase.from("clients").select("id, name").order("name"),
     supabase.from("bookings").select("*, locations(id, name, size, city)").order("created_at", { ascending: false }),
     supabase.from("booking_invoices").select("*").neq("status", "CANCELLED"),
     supabase.from("invoice_payments").select("*").order("payment_date", { ascending: false }),
   ]);
 
-  const locations = (locationsResult.data ?? []) as { id: number; name: string; size: string; city: string }[];
+  const locations = (locationsResult.data ?? []) as BookingFormLocation[];
   const clients = (clientsResult.data ?? []) as { id: number; name: string }[];
   const bookings = (bookingsResult.data ?? []) as DashboardBooking[];
   const invoices = (invoicesResult.data ?? []) as BookingInvoice[];
@@ -466,7 +466,7 @@ export default async function DashboardPage() {
                     <td className="px-5 py-4 font-bold text-slate-900">{money(booking.amount)}</td>
                     <td className="whitespace-nowrap px-5 py-4 text-slate-600">{formatDate(booking.start_date)}</td>
                     <td className="whitespace-nowrap px-5 py-4 text-slate-600">{formatDate(booking.end_date)}</td>
-                    <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${statusDisplay.cls}`}>{statusDisplay.label}</span></td>
+                    <td className="px-5 py-4"><span className={`inline-flex rounded-full whitespace-nowrap px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${statusDisplay.cls}`}>{statusDisplay.label}</span></td>
                   </tr>
                 );
               })}

@@ -10,7 +10,7 @@ import { DeleteExpenseButton } from "./DeleteExpenseButton";
 import { AddPartnerModal } from "./AddPartnerModal";
 import { EditPartnerModal } from "./EditPartnerModal";
 import { DeletePartnerButton } from "./DeletePartnerButton";
-import type { LocationWithBookings, Booking, LocationExpense, LocationPartner, LocationImage, LocationDocument } from "@/lib/supabase/types";
+import type { LocationWithBookings, Booking, LocationExpense, LocationPartner, LocationImage, LocationDocument, BookingFormLocation } from "@/lib/supabase/types";
 import { AddBookingModal } from "@/app/dashboard/bookings/AddBookingModal";
 import { EditLocationModal } from "@/app/dashboard/locations/EditLocationModal";
 import { EditBookingModal } from "@/app/dashboard/bookings/EditBookingModal";
@@ -18,6 +18,7 @@ import { InvoiceManagerModal } from "@/app/dashboard/bookings/InvoiceManagerModa
 import { LocationImagesTab } from "./LocationImagesTab";
 import { LocationDocumentsTab } from "./LocationDocumentsTab";
 import { locationCategoryLabels } from "@/lib/location-showcase-types";
+import { expenseTypeLabel } from "@/lib/expenses";
 import { getBookingInvoiceStatus, getInvoiceTotals } from "@/lib/invoices";
 import { ManagementMetric, ManagementPageHero } from "@/app/dashboard/components/ManagementPage";
 
@@ -34,17 +35,6 @@ const bookingStatusLabel: Record<string, { label: string; cls: string }> = {
   active: { label: "Active", cls: "bg-green-100 text-green-700" },
   expiring: { label: "Expiring Soon", cls: "bg-amber-100 text-amber-700" },
   expired: { label: "Expired", cls: "bg-red-100 text-red-700" },
-};
-
-const expenseTypeLabel: Record<string, string> = {
-  rent: "RENT",
-  tax: "TAX",
-  electricity_bills_lights_charges: "Electricity Bills / Lights Charges",
-  pr_commission: "PR Commission",
-  noc_fees: "NOC Fees",
-  labour_installation_cost: "Labour / Installation Cost",
-  installation: "Labour / Installation Cost",
-  land_rent: "RENT",
 };
 
 const landTypeLabel: Record<string, { label: string; cls: string }> = {
@@ -77,7 +67,7 @@ export default async function LocationDetailPage({
   const [{ data: location }, { data: allLocations }, { data: expensesData }, { data: partnersData }, { data: clientsData }, { data: imagesData }, { data: documentsData }] =
     await Promise.all([
       supabase.from("locations").select("*, bookings(*, booking_invoices(*))").eq("id", Number(id)).single(),
-      supabase.from("locations").select("id, name, size, city").eq("is_active", true).order("name"),
+      supabase.from("locations").select("id, name, size, city, is_outsourced, outsourced_from, purchase_price").eq("is_active", true).order("name"),
       supabase.from("location_expenses").select("*").eq("location_id", Number(id)).order("expense_date", { ascending: false }),
       supabase.from("location_partners").select("*").eq("location_id", Number(id)).order("partner_name"),
       supabase.from("clients").select("id, name, email").order("name"),
@@ -88,7 +78,7 @@ export default async function LocationDetailPage({
   if (!location) notFound();
 
   const loc = location as LocationWithBookings;
-  const locations = (allLocations ?? []) as { id: number; name: string; size: string; city: string }[];
+  const locations = (allLocations ?? []) as BookingFormLocation[];
   const expenses = (expensesData ?? []) as LocationExpense[];
   const partners = (partnersData ?? []) as LocationPartner[];
   const clients = (clientsData ?? []) as { id: number; name: string; email: string | null }[];
@@ -135,6 +125,12 @@ export default async function LocationDetailPage({
           <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-[11px] font-semibold text-amber-200">{formatLocationPrice(loc)}</span>
           <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">{llt.label}</span>
           <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">{locationCategoryLabels[loc.media_category]}</span>
+          {loc.is_outsourced && (
+            <span className="rounded-full border border-purple-300/30 bg-purple-300/10 px-3 py-1.5 text-[11px] font-semibold text-purple-200">
+              Outsourced from {loc.outsourced_from}
+              {loc.purchase_price !== null ? ` · buy PKR ${Math.round(loc.purchase_price).toLocaleString("en-PK")}` : ""}
+            </span>
+          )}
           {loc.facing_from && <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">From {loc.facing_from}</span>}
           {loc.facing_towards && <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold text-slate-300">Towards {loc.facing_towards}</span>}
         </>}
@@ -157,7 +153,7 @@ export default async function LocationDetailPage({
               {formatDate(activeBooking.start_date)} → {formatDate(activeBooking.end_date)} ({activeBooking.duration})
             </p>
           </div>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${bookingStatusLabel[bookingStatus(activeBooking.end_date)].cls}`}>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full whitespace-nowrap text-sm font-medium ${bookingStatusLabel[bookingStatus(activeBooking.end_date)].cls}`}>
             {bookingStatusLabel[bookingStatus(activeBooking.end_date)].label}
           </span>
         </div>
@@ -231,11 +227,11 @@ export default async function LocationDetailPage({
                           <td className="px-4 py-3 text-slate-500">{b.vendor ?? "—"}</td>
                           <td className="px-4 py-3 text-slate-500 text-xs">{b.locking_ref ?? "—"}</td>
                           <td className="px-4 py-3">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isl.cls}`}>{isl.label}</span>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full whitespace-nowrap text-xs font-medium ${isl.cls}`}>{isl.label}</span>
                             <p className="mt-1 text-[10px] text-slate-400">PKR {Math.round(invoiceTotals.outstanding).toLocaleString()} due</p>
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${bsl.cls}`}>{bsl.label}</span>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full whitespace-nowrap text-xs font-medium ${bsl.cls}`}>{bsl.label}</span>
                           </td>
                           <td className="px-4 py-3 text-slate-400 text-xs max-w-32 truncate">{b.remarks ?? "—"}</td>
                           <td className="px-4 py-3">

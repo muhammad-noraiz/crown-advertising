@@ -7,9 +7,10 @@ import type { ManagementAccess } from "@/lib/permissions";
 interface Props {
   children: React.ReactNode;
   access: ManagementAccess | null;
+  alertCount: number;
 }
 
-export function DashboardShell({ children, access }: Props) {
+export function DashboardShell({ children, access, alertCount }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [dark, setDark] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -51,6 +52,7 @@ export function DashboardShell({ children, access }: Props) {
         dark={dark}
         onToggleDark={toggleDark}
         access={access}
+        alertCount={alertCount}
       />
       <main
         className="transition-[padding-left] duration-300"

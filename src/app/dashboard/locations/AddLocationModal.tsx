@@ -3,6 +3,7 @@
 import { useState, useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createLocationAction } from "@/actions/locations";
+import { OwnershipFields } from "./OwnershipFields";
 
 function LocationModalContent({ onClose }: { onClose: () => void }) {
   const router = useRouter();
@@ -49,6 +50,8 @@ function LocationModalContent({ onClose }: { onClose: () => void }) {
                 className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
+
+            <OwnershipFields />
 
             <div className="grid grid-cols-2 gap-4">
               <div>

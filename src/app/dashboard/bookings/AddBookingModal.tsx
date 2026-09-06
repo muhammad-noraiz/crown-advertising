@@ -4,16 +4,10 @@ import { useState, useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createBookingAction } from "@/actions/bookings";
 import { DURATION_PRESETS, addDuration } from "@/lib/utils";
-
-interface Location {
-  id: number;
-  name: string;
-  size: string;
-  city: string;
-}
+import type { BookingFormLocation } from "@/lib/supabase/types";
 
 interface Props {
-  locations: Location[];
+  locations: BookingFormLocation[];
   clients: { id: number; name: string }[];
   defaultLocationId?: number;
   buttonClassName?: string;
@@ -35,6 +29,14 @@ function BookingModalContent({
   const [selectedClientId, setSelectedClientId] = useState("");
   const [clientName, setClientName] = useState("");
   const [billingType, setBillingType] = useState<"monthly" | "end_of_term">("monthly");
+  const [locationId, setLocationId] = useState(defaultLocationId ? String(defaultLocationId) : "");
+
+  // Outsourced sites are bought in, so the buy price is the floor for this sale.
+  const selectedLocation = locations.find((location) => String(location.id) === locationId);
+  const buyPrice =
+    selectedLocation?.is_outsourced && selectedLocation.purchase_price !== null
+      ? `PKR ${Math.round(selectedLocation.purchase_price).toLocaleString("en-PK")}`
+      : null;
 
   function handleClientChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = e.target.value;
@@ -80,7 +82,8 @@ function BookingModalContent({
               <select
                 name="locationId"
                 required
-                defaultValue={defaultLocationId ?? ""}
+                value={locationId}
+                onChange={(event) => setLocationId(event.target.value)}
                 className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
               >
                 <option value="" disabled>Select a location…</option>
@@ -90,6 +93,15 @@ function BookingModalContent({
                   </option>
                 ))}
               </select>
+
+              {selectedLocation?.is_outsourced && (
+                <p className="mt-2 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 text-xs text-purple-800">
+                  Outsourced from <span className="font-semibold">{selectedLocation.outsourced_from}</span>
+                  {buyPrice
+                    ? <> · purchase price <span className="font-semibold">{buyPrice}</span>. Price the sale above it to keep your commission.</>
+                    : <> · no purchase price recorded on this location yet.</>}
+                </p>
+              )}
             </div>
 
             {/* Client + Sale */}
@@ -260,6 +272,20 @@ function BookingModalContent({
                 <input name="generateInvoices" type="checkbox" defaultChecked className="peer sr-only" />
                 <span className="relative h-6 w-11 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-amber-500 peer-focus-visible:ring-2 peer-focus-visible:ring-amber-500 peer-focus-visible:ring-offset-2 after:absolute after:left-1 after:top-1 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5" />
               </label>
+
+              <label className="mt-3 block text-sm font-medium text-slate-700">
+                Invoice No.
+                <input
+                  name="invoiceNoBase"
+                  placeholder="Auto if blank, e.g. CR - AD 187"
+                  className="mt-1.5 w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+                <span className="mt-1 block text-xs text-slate-500">
+                  {billingType === "monthly"
+                    ? "Numbering continues from here for each month, so CR - AD 187 becomes 187, 188, 189…"
+                    : "Used as the invoice number for this booking."}
+                </span>
+              </label>
             </div>
 
             <div>
@@ -277,6 +303,7 @@ function BookingModalContent({
               />
               <p className="mt-1.5 text-xs text-slate-500">
                 {billingType === "monthly" ? "The total will be divided evenly across the monthly invoices." : "The full amount will be due on the booking end date."}
+                {buyPrice && <span className="font-semibold text-purple-700"> Purchase price on this location: {buyPrice}.</span>}
               </p>
             </div>
             <div>

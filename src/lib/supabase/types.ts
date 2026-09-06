@@ -5,12 +5,14 @@ export type DashboardPermission = 'overview' | 'locations' | 'bookings' | 'clien
 export type LandType = 'private' | 'government' | 'crown';
 export type PricingBasis = 'monthly' | 'slot' | 'on_request';
 export type LocationMediaCategory = 'static' | 'motorway' | 'digital' | 'bridge-panel' | 'toll-plaza';
+export type LocationDocumentType = 'noc' | 'stability_certificate' | 'rental' | 'tax' | 'other';
 export type ExpenseType =
   | 'rent'
   | 'tax'
   | 'electricity_bills_lights_charges'
   | 'pr_commission'
   | 'noc_fees'
+  | 'stability_certificate'
   | 'labour_installation_cost';
 
 export interface Location {
@@ -26,6 +28,12 @@ export interface Location {
   facing_from: string | null;
   facing_towards: string | null;
   media_category: LocationMediaCategory;
+  /** True when the site is bought in from another media owner rather than owned by Crown. */
+  is_outsourced: boolean;
+  /** The media owner Crown buys the site from. Required while is_outsourced. */
+  outsourced_from: string | null;
+  /** What Crown pays the owner. The sale price stays per-booking. */
+  purchase_price: number | null;
   source_slide: number | null;
   public_image_path: string | null;
   is_active: boolean;
@@ -45,12 +53,21 @@ export type LocationInsert = {
   facing_from?: string | null;
   facing_towards?: string | null;
   media_category?: LocationMediaCategory;
+  is_outsourced?: boolean;
+  outsourced_from?: string | null;
+  purchase_price?: number | null;
   source_slide?: number | null;
   public_image_path?: string | null;
   is_active?: boolean;
 };
 
 export type LocationUpdate = Partial<Omit<Location, 'id' | 'created_at' | 'updated_at'>>;
+
+/** What the booking forms need from a location, including the buy-in details of outsourced sites. */
+export type BookingFormLocation = Pick<
+  Location,
+  'id' | 'name' | 'size' | 'city' | 'is_outsourced' | 'outsourced_from' | 'purchase_price'
+>;
 
 export interface Booking {
   id: number;
@@ -173,6 +190,11 @@ export interface LocationDocument {
   file_name: string;
   mime_type: string;
   size_bytes: number | null;
+  document_type: LocationDocumentType;
+  /** Start of the validity period. NULL when only an end date was recorded. */
+  valid_from: string | null;
+  /** Date the document stops being valid. NULL for paperwork that never expires. */
+  valid_until: string | null;
   created_at: string;
 }
 

@@ -3,21 +3,8 @@
 import { useState, useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateLocation } from "@/actions/locations";
-
-interface Location {
-  id: number;
-  name: string;
-  size: string;
-  city: string;
-  address: string | null;
-  land_type?: string;
-  price_per_month?: number | null;
-  price_label?: string | null;
-  pricing_basis?: string | null;
-  facing_from?: string | null;
-  facing_towards?: string | null;
-  media_category?: string | null;
-}
+import { OwnershipFields } from "./OwnershipFields";
+import type { Location } from "@/lib/supabase/types";
 
 function EditLocationModalContent({
   location,
@@ -67,6 +54,12 @@ function EditLocationModalContent({
                 className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
+
+            <OwnershipFields
+              defaultOutsourced={location.is_outsourced}
+              defaultOwner={location.outsourced_from ?? ""}
+              defaultPurchasePrice={location.purchase_price ?? ""}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <div>

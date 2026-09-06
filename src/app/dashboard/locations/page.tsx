@@ -134,7 +134,7 @@ export default async function LocationsPage({ searchParams }: { searchParams: Pr
                 <Link key={loc.id} href={`/dashboard/locations/${loc.id}`} className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_14px_36px_-32px_rgba(15,23,42,.8)] transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-[0_22px_46px_-30px_rgba(15,23,42,.75)] dark:border-slate-700 dark:hover:border-amber-400/50">
                   <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-gradient-to-bl from-amber-100/80 to-transparent opacity-70 dark:from-amber-400/10" />
                   <div className="relative flex items-start justify-between gap-3">
-                    <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${statusClass}`}>{statusText}</span>
+                    <span className={`inline-flex rounded-full whitespace-nowrap px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${statusClass}`}>{statusText}</span>
                     <svg className="h-5 w-5 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </div>
                   <div className="relative mt-6">
@@ -143,6 +143,9 @@ export default async function LocationsPage({ searchParams }: { searchParams: Pr
                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-500">
                       <span className="rounded-lg bg-slate-100 px-2.5 py-1.5 dark:bg-slate-800 dark:text-slate-300">{loc.size}</span>
                       <span className="rounded-lg bg-slate-100 px-2.5 py-1.5 capitalize dark:bg-slate-800 dark:text-slate-300">{loc.media_category.replaceAll("_", " ")}</span>
+                      {loc.is_outsourced && (
+                        <span className="rounded-lg bg-purple-100 px-2.5 py-1.5 text-purple-700 dark:bg-purple-400/10 dark:text-purple-300">Outsourced</span>
+                      )}
                     </div>
                     <p className="mt-5 text-sm font-bold text-slate-900 dark:text-slate-100">{formatLocationPrice(loc)}</p>
                   </div>

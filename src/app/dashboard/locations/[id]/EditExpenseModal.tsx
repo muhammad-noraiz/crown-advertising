@@ -2,17 +2,9 @@
 
 import { useState, useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { EXPENSE_TYPES } from "@/lib/expenses";
 import { updateExpense } from "@/actions/expenses";
 import type { LocationExpense } from "@/lib/supabase/types";
-
-const EXPENSE_TYPES = [
-  { value: "rent", label: "RENT" },
-  { value: "tax", label: "TAX" },
-  { value: "electricity_bills_lights_charges", label: "Electricity Bills / Lights Charges" },
-  { value: "pr_commission", label: "PR Commission" },
-  { value: "noc_fees", label: "NOC Fees" },
-  { value: "labour_installation_cost", label: "Labour / Installation Cost" },
-];
 
 function EditExpenseContent({
   expense,

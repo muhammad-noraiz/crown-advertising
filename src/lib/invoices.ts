@@ -73,8 +73,29 @@ export function getBookingInvoiceStatus(invoices: BookingInvoice[]): InvoiceDisp
   return "PENDING";
 }
 
+/**
+ * Continues a manual invoice number across a schedule: "CR - AD 187" over three
+ * months becomes 187, 188, 189, because accounting needs distinct sequential
+ * numbers rather than one number with -001 suffixes. Bases with no trailing
+ * digits fall back to numbered suffixes.
+ */
+export function sequenceInvoiceNumber(base: string, index: number): string {
+  const trimmed = base.trim();
+  const match = trimmed.match(/^(.*?)(\d+)(\D*)$/);
+  if (!match) return index === 0 ? trimmed : `${trimmed}-${String(index + 1).padStart(3, "0")}`;
+  const [, prefix, digits, suffix] = match;
+  return `${prefix}${String(Number(digits) + index).padStart(digits.length, "0")}${suffix}`;
+}
+
+function invoiceNumberAt(bookingId: number, base: string | null | undefined, index: number): string {
+  const trimmed = base?.trim();
+  if (trimmed) return sequenceInvoiceNumber(trimmed, index);
+  return `INV-${bookingId}-${String(index + 1).padStart(3, "0")}`;
+}
+
 export function buildInvoiceSchedule(
-  booking: Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">
+  booking: Pick<Booking, "id" | "amount" | "billing_type" | "start_date" | "end_date">,
+  invoiceNoBase?: string | null
 ): InvoiceScheduleRow[] {
   if (booking.amount <= 0) return [];
 
@@ -85,7 +106,7 @@ export function buildInvoiceSchedule(
     return [
       {
         booking_id: booking.id,
-        invoice_no: `INV-${booking.id}-001`,
+        invoice_no: invoiceNumberAt(booking.id, invoiceNoBase, 0),
         period_start: dateOnly(bookingStart),
         period_end: dateOnly(bookingEnd),
         due_date: dateOnly(bookingEnd),
@@ -121,7 +142,7 @@ export function buildInvoiceSchedule(
 
     return {
       booking_id: booking.id,
-      invoice_no: `INV-${booking.id}-${String(index + 1).padStart(3, "0")}`,
+      invoice_no: invoiceNumberAt(booking.id, invoiceNoBase, index),
       period_start: dateOnly(period.start),
       period_end: dateOnly(period.end),
       due_date: dateOnly(period.start),

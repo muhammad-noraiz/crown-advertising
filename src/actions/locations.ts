@@ -21,6 +21,12 @@ function parseLocationForm(formData: FormData) {
   const media_category = ((formData.get("mediaCategory") as LocationMediaCategory) || "static") as LocationMediaCategory;
   const public_image_path = (formData.get("publicImagePath") as string)?.trim() || null;
 
+  // Owner and purchase price belong to outsourced sites only, so switching a site
+  // back to company-owned clears them rather than leaving stale numbers behind.
+  const is_outsourced = formData.get("ownership") === "outsourced";
+  const purchaseRaw = (formData.get("purchasePrice") as string)?.trim();
+  const purchasePrice = purchaseRaw ? Number(purchaseRaw.replace(/,/g, "")) : null;
+
   return {
     name,
     size,
@@ -34,7 +40,19 @@ function parseLocationForm(formData: FormData) {
     facing_towards,
     media_category,
     public_image_path,
+    is_outsourced,
+    outsourced_from: is_outsourced ? (formData.get("outsourcedFrom") as string)?.trim() || null : null,
+    purchase_price: is_outsourced && Number.isFinite(purchasePrice) ? purchasePrice : null,
   };
+}
+
+/** One gate for all three write paths — create, update and the modal variant. */
+function validateLocation(payload: ReturnType<typeof parseLocationForm>): string | null {
+  if (!payload.name || !payload.size || !payload.city) return "Name, size, and city are required.";
+  if (payload.is_outsourced && !payload.outsourced_from) {
+    return "An outsourced location needs the original owner it is bought from.";
+  }
+  return null;
 }
 
 export async function createLocation(
@@ -43,9 +61,8 @@ export async function createLocation(
 ): Promise<string | null> {
   await requirePermission("locations");
   const payload = parseLocationForm(formData);
-  const { name, size, city } = payload;
-
-  if (!name || !size || !city) return "Name, size, and city are required.";
+  const invalid = validateLocation(payload);
+  if (invalid) return invalid;
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -65,9 +82,8 @@ export async function updateLocation(
 ): Promise<string | null> {
   await requirePermission("locations");
   const payload = parseLocationForm(formData);
-  const { name, size, city } = payload;
-
-  if (!name || !size || !city) return "Name, size, and city are required.";
+  const invalid = validateLocation(payload);
+  if (invalid) return invalid;
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -98,9 +114,8 @@ export async function createLocationAction(
 ): Promise<string | null> {
   await requirePermission("locations");
   const payload = parseLocationForm(formData);
-  const { name, size, city } = payload;
-
-  if (!name || !size || !city) return "Name, size, and city are required.";
+  const invalid = validateLocation(payload);
+  if (invalid) return invalid;
 
   const supabase = await createClient();
   const { data, error } = await supabase
